@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 // 3. KHAI BÁO ROUTES (Bắt buộc phải nằm dưới app = express())
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
-// const categoryRoutes = require('./routes/category.routes');
+const categoryRoutes = require('./routes/category.routes');
 // const assetRoutes = require('./routes/asset.routes');
 // const auctionRoutes = require('./routes/auction.routes');
 // const bidRoutes = require('./routes/bid.routes');
@@ -38,7 +38,7 @@ const userRoutes = require('./routes/user.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/categories', categoryRoutes);
+app.use('/api/categories', categoryRoutes);
 // app.use('/api/assets', assetRoutes);
 // app.use('/api/auctions', auctionRoutes);
 // app.use('/api/bids', bidRoutes);
