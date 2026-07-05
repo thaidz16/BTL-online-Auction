@@ -27,19 +27,19 @@ const AssetController = {
 
     getApprovedAssets: async (req, res) => {
         try {
-            // Dùng JOIN để lấy luôn tên danh mục và tên người bán cho xịn
-            const query = `
-                SELECT a.*, c.name as category_name, u.fullname as seller_name 
-                FROM assets a 
-                JOIN categories c ON a.category_id = c.id 
-                JOIN users u ON a.seller_id = u.id 
-                WHERE a.status = 'APPROVED'
-                ORDER BY a.created_at DESC
-            `;
-            const [rows] = await db.execute(query);
+            // Dùng JOIN gộp bảng assets (lấy tên, ảnh) và bảng auction_sessions (lấy giá, giờ)
+            const [rows] = await db.execute(`
+                SELECT a.id, a.name, a.description, a.image, a.condition_tag,
+                       s.current_price, s.end_time 
+                FROM assets a
+                JOIN auction_sessions s ON a.id = s.asset_id
+                WHERE s.status = 'active'
+                ORDER BY s.end_time ASC
+            `);
+
             res.status(200).json({ success: true, data: rows });
         } catch (error) {
-            console.error(error);
+            console.error("Lỗi lấy danh sách tài sản:", error);
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
@@ -65,7 +65,29 @@ const AssetController = {
             console.error(error);
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
+    },
+    getAssetById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            
+            const [rows] = await db.execute(`
+                SELECT a.*, s.current_price, s.end_time 
+                FROM assets a
+                LEFT JOIN auction_sessions s ON a.id = s.asset_id
+                WHERE a.id = ?
+            `, [id]);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Không tìm thấy tài sản này!' });
+            }
+
+            res.status(200).json({ success: true, data: rows[0] });
+        } catch (error) {
+            console.error("Lỗi lấy chi tiết tài sản:", error);
+            res.status(500).json({ success: false, message: 'Lỗi server!' });
+        }
     }
 };
+
 
 module.exports = AssetController;
