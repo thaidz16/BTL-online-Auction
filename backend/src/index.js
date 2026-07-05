@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
-// const assetRoutes = require('./routes/asset.routes');
+const assetRoutes = require('./routes/asset.routes');
 // const auctionRoutes = require('./routes/auction.routes');
 // const bidRoutes = require('./routes/bid.routes');
 // const notificationRoutes = require('./routes/notification.routes');
@@ -39,7 +39,7 @@ const categoryRoutes = require('./routes/category.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
-// app.use('/api/assets', assetRoutes);
+app.use('/api/assets', assetRoutes);
 // app.use('/api/auctions', auctionRoutes);
 // app.use('/api/bids', bidRoutes);
 // app.use('/api/notifications', notificationRoutes);
