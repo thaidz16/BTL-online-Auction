@@ -21,9 +21,7 @@ const WalletPage = () => {
         fetchWallet();
     }, []);
 
-    // Logic tạo link QR động: 
-    // Format: https://img.vietqr.io/image/<BANK_ID>-<ACCOUNT_NO>-<TEMPLATE>.png?amount=<AMOUNT>&addInfo=<CONTENT>&accountName=<NAME>
-    const qrCodeUrl = `https://img.vietqr.io/image/TCB-0961590214-compact2.png?amount=${depositAmount}&addInfo=NAP%20${wallet.email}&accountName=CHU%20QUOC%20THAI`;
+    const qrCodeUrl = `https://img.vietqr.io/image/MB-0961590214-compact2.png?amount=${depositAmount}&addInfo=NAP%20${wallet.email}&accountName=CHU%20QUOC%20THAI`;
 
     const handleConfirmDeposit = async () => {
         if (depositAmount < 50000) {
@@ -70,7 +68,7 @@ const WalletPage = () => {
                             
                             <div>
                                 <h4 style={{ margin: '0 0 10px 0', color: '#b71c1c' }}>Quét mã QR qua App Ngân hàng</h4>
-                                <p style={{ margin: '5px 0' }}>Ngân hàng: <b>Techcombank</b></p>
+                                <p style={{ margin: '5px 0' }}>Ngân hàng: <b>MBBank (Quân Đội)</b></p>
                                 <p style={{ margin: '5px 0' }}>Chủ TK: <b>CHU QUOC THAI</b></p>
                                 <p style={{ margin: '5px 0' }}>Số TK: <b>0961590214</b></p>
                                 <p style={{ margin: '5px 0', color: '#e65100' }}>Nội dung CK: <b>NAP {wallet.email}</b></p>
