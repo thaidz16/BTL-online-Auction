@@ -12,10 +12,9 @@ const LoginPage = () => {
         try {
             const res = await api.post('/auth/login', { email, password });
             
-            // 1. Lưu token để xác thực
             localStorage.setItem('token', res.data.token);
+            localStorage.setItem('role', res.data.user.role); // LƯU THÊM ROLE VÀO ĐÂY
             
-            // 2. Load lại trang để Navbar nhận diện token mới và chuyển sang "Đăng xuất"
             alert('Đăng nhập thành công!');
             window.location.reload(); 
             navigate('/');

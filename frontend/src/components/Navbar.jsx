@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
+    const role = localStorage.getItem('role');
     const isLoggedIn = !!localStorage.getItem('token');
 
     const handleLogout = () => {
@@ -19,7 +20,11 @@ const Navbar = () => {
                 <span style={{ fontWeight: 'bold', fontSize: '18px', backgroundColor: 'white', color: '#b71c1c', padding: '5px 15px', borderRadius: '20px' }}>📞 0961.590.214</span>
                 <Link to="/history" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Lịch sử đấu giá</Link>
                 <Link to="/wallet" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Ví tiền</Link>
-                
+                {role === 'admin' && (
+    <Link to="/admin" style={{ color: 'white', backgroundColor: '#333', padding: '5px 15px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold' }}>
+        ⚙️ Quản trị
+    </Link>
+)}
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '10px' }}>
                     {isLoggedIn ? (
                         <button onClick={handleLogout} style={{ color: '#b71c1c', background: 'white', padding: '8px 20px', borderRadius: '6px', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Đăng xuất</button>
