@@ -18,7 +18,8 @@ const Navbar = () => {
             
             {/* Cụm Logo & Tên sàn */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <Link to="/" style={{ color: 'white', textDecoration: 'none', fontSize: '26px', fontWeight: '900', letterSpacing: '1px' }}>
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white', textDecoration: 'none', fontSize: '26px', fontWeight: '900', letterSpacing: '1px' }}>
+                    <img src="/logo-navbar.png" alt="Logo Sàn" style={{ height: '60px', width: 'auto' }} />
                     PHENIKAA AUCTION
                 </Link>
                 <span style={{ fontSize: '14px', borderLeft: '2px solid white', paddingLeft: '15px', opacity: 0.9 }}>
