@@ -1,20 +1,18 @@
 const db = require('../config/db');
 
 const AssetController = {
-    // 1. User tạo tài sản mới
     createAsset: async (req, res) => {
         try {
             const seller_id = req.user.id;
-            const { category_id, name, description, images } = req.body;
+            const { category_id, name, description, image, condition_tag } = req.body;
             
-            if (!category_id || !name) {
+            if (!name || !description || !image) {
                 return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc!' });
             }
-            const imagesJson = JSON.stringify(images || []); 
 
             const [result] = await db.execute(
-                'INSERT INTO assets (seller_id, category_id, name, description, images) VALUES (?, ?, ?, ?, ?)',
-                [seller_id, category_id, name, description, imagesJson]
+                "INSERT INTO assets (seller_id, category_id, name, description, image, condition_tag, status) VALUES (?, ?, ?, ?, ?, ?, 'PENDING')",
+                [seller_id, category_id || 1, name, description, image, condition_tag || 'Mới 100%']
             );
 
             res.status(201).json({ success: true, message: 'Đăng tài sản thành công, đang chờ duyệt!', asset_id: result.insertId });
@@ -24,10 +22,8 @@ const AssetController = {
         }
     },
 
-
     getApprovedAssets: async (req, res) => {
         try {
-            // Dùng JOIN gộp bảng assets (lấy tên, ảnh) và bảng auction_sessions (lấy giá, giờ)
             const [rows] = await db.execute(`
                 SELECT a.id, a.name, a.description, a.image, a.condition_tag,
                        s.current_price, s.end_time 
@@ -39,12 +35,11 @@ const AssetController = {
 
             res.status(200).json({ success: true, data: rows });
         } catch (error) {
-            console.error("Lỗi lấy danh sách tài sản:", error);
+            console.error(error);
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
 
-    // 3. Admin duyệt tài sản
     approveAsset: async (req, res) => {
         try {
             const { id } = req.params;
@@ -66,6 +61,16 @@ const AssetController = {
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
+
+    getPendingAssets: async (req, res) => {
+        try {
+            const [rows] = await db.execute('SELECT * FROM assets WHERE status = "PENDING" ORDER BY created_at DESC');
+            res.status(200).json({ success: true, data: rows });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Lỗi server!' });
+        }
+    },
+
     getAssetById: async (req, res) => {
         try {
             const { id } = req.params;
@@ -83,11 +88,10 @@ const AssetController = {
 
             res.status(200).json({ success: true, data: rows[0] });
         } catch (error) {
-            console.error("Lỗi lấy chi tiết tài sản:", error);
+            console.error(error);
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     }
 };
-
 
 module.exports = AssetController;

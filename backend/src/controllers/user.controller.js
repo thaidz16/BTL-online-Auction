@@ -26,6 +26,21 @@ const UserController = {
         }
     },
 
+    getPendingDeposits: async (req, res) => {
+        try {
+            const [rows] = await db.execute(`
+                SELECT d.*, u.email as user_email 
+                FROM deposits d 
+                JOIN users u ON d.user_id = u.id 
+                WHERE d.status = 'PENDING'
+                ORDER BY d.created_at ASC
+            `);
+            res.status(200).json({ success: true, data: rows });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Lỗi server!' });
+        }
+    },
+
     // Admin duyệt nạp tiền
     approveDeposit: async (req, res) => {
         const { deposit_id, user_id, amount } = req.body;
