@@ -2,18 +2,22 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async (toEmail, subject, textContent) => {
     try {
-        // Cấu hình "bưu điện"
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
             auth: {
-                user: '24107856@st.phenikaa-uni.edu.vn',
-                pass: 'vrlifospwsvlnzck'   
+                user: process.env.EMAIL_USER, // Không điền trực tiếp email vào đây
+                pass: process.env.EMAIL_PASS  // Không điền trực tiếp pass vào đây
+            },
+            tls: {
+                rejectUnauthorized: false
             }
         });
 
         // Đóng gói bức thư
         const mailOptions = {
-            from: '"PHENIKAA AUCTION" <email-cua-em@gmail.com>',
+            from: `"PHENIKAA AUCTION" <${process.env.EMAIL_USER}>`,
             to: toEmail,
             subject: subject,
             text: textContent
