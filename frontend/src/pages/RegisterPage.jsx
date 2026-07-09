@@ -13,28 +13,31 @@ const RegisterPage = () => {
     const navigate = useNavigate();
 
     // Xử lý khi bấm nút "Đăng Ký"
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await api.post('/auth/register', formData);
-            alert(res.data.message);
-            setStep(2); // Thành công thì chuyển sang form nhập OTP
-        } catch (err) {
-            alert(err.response?.data?.message || 'Lỗi đăng ký!');
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const res = await api.post('/auth/register', formData);
+        if (res.status === 200 || res.status === 201) {
+            alert(res.data.message || 'Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP.');
+            setStep(2);
         }
-    };
+    } catch (err) {
+        alert(err.response?.data?.message || 'Lỗi đăng ký, vui lòng thử lại!');
+    }
+};
 
-    // Xử lý khi bấm nút "Xác thực OTP"
-    const handleVerify = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await api.post('/auth/verify-otp', { email: formData.email, otp });
-            alert(res.data.message);
-            navigate('/login'); // Xác thực xong đẩy về trang Đăng nhập
-        } catch (err) {
-            alert(err.response?.data?.message || 'Mã OTP sai!');
+const handleVerify = async (e) => {
+    e.preventDefault();
+    try {
+        const res = await api.post('/auth/verify-otp', { email: formData.email, otp });
+        if (res.status === 200 || res.status === 201) {
+            alert(res.data.message || 'Xác thực thành công!');
+            navigate('/login');
         }
-    };
+    } catch (err) {
+        alert(err.response?.data?.message || 'Mã OTP không chính xác!');
+    }
+};
 
     return (
         <div style={{ backgroundColor: '#f5f5f5', minHeight: '90vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
