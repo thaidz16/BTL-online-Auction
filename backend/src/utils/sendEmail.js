@@ -1,34 +1,42 @@
-const nodemailer = require('nodemailer');
-
 const sendEmail = async (toEmail, subject, textContent) => {
     try {
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER, // Không điền trực tiếp email vào đây
-                pass: process.env.EMAIL_PASS  // Không điền trực tiếp pass vào đây
-            },
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
+        const apiKey = process.env.BREVO_API_KEY;
+        const senderEmail = process.env.EMAIL_USER; // Email em đăng ký Brevo
 
-        // Đóng gói bức thư
-        const mailOptions = {
-            from: `"PHENIKAA AUCTION" <${process.env.EMAIL_USER}>`,
-            to: toEmail,
+        // Đóng gói dữ liệu gửi cho Brevo
+        const payload = {
+            sender: { 
+                name: "PHENIKAA AUCTION", 
+                email: senderEmail
+            },
+            to: [{ email: toEmail }],
             subject: subject,
-            text: textContent
+            // Brevo hỗ trợ HTML nên anh format lại text cho xuống dòng đẹp hơn
+            htmlContent: `<p>${textContent.replace(/\n/g, '<br>')}</p>` 
         };
 
-        // Gửi đi
-        await transporter.sendMail(mailOptions);
-        console.log(`Đã gửi email thành công tới: ${toEmail}`);
+        // Gọi thẳng vào trung tâm của Brevo
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        // Nếu Brevo chê (lỗi cấu hình, sai key...)
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Lỗi từ server Brevo:", errorData);
+            return false;
+        }
+
+        console.log(`Đã bắn API gửi mail thành công tới: ${toEmail}`);
         return true;
     } catch (error) {
-        console.error("Lỗi khi gửi email:", error);
+        console.error("Lỗi hệ thống khi kết nối Brevo:", error);
         return false;
     }
 };
