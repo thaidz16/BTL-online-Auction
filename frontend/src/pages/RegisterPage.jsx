@@ -13,7 +13,7 @@ const RegisterPage = () => {
     const navigate = useNavigate();
 
     // Xử lý khi bấm nút "Đăng Ký"
-    const handleSubmit = async (e) => {
+    const handleRegister = async (e) => {
     e.preventDefault();
     try {
         const res = await api.post('/auth/register', formData);
