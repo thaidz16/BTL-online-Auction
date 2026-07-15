@@ -44,6 +44,33 @@ const ProductDetailPage = () => {
         );
     }
 
+    // HÀM CHUYỂN ĐỔI CHUỖI JSON SANG OBJECT AN TOÀN (ANTI-CRASH)
+    const getSpecs = () => {
+        if (!asset.specifications) {
+            // MOCK DATA ĐỂ EM DEMO TRƯỚC NẾU DATABASE CHƯA CÓ DỮ LIỆU THẬT
+            return {
+                "Bộ vi xử lý": "Intel Core i7 12700H (Up to 4.7GHz)",
+                "Bộ nhớ RAM": "16GB DDR5 4800MHz (Hỗ trợ nâng cấp tối đa 64GB)",
+                "Card đồ họa": "NVIDIA GeForce RTX 4060 8GB GDDR6",
+                "Ổ lưu trữ": "512GB SSD M.2 PCIe Gen 4",
+                "Màn hình": "15.6 inch FHD IPS, 144Hz, 100% sRGB",
+                "Hệ điều hành": "Windows 11 Home bản quyền",
+                "Trọng lượng": "2.2 kg"
+            };
+        }
+        try {
+            // Nếu database lưu dạng JSON Object rồi thì trả về luôn, nếu là string thì parse ra
+            return typeof asset.specifications === 'string' 
+                ? JSON.parse(asset.specifications) 
+                : asset.specifications;
+        } catch (e) {
+            console.error("Lỗi parse JSON thông số kỹ thuật:", e);
+            return null;
+        }
+    };
+
+    const specs = getSpecs();
+
     return (
         <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '40px 20px' }}>
             <div style={{ maxWidth: '1100px', margin: '0 auto', backgroundColor: '#fff', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
@@ -52,6 +79,7 @@ const ProductDetailPage = () => {
                     ⬅ Quay lại
                 </button>
 
+                {/* KHU VỰC THÔNG TIN CHÍNH */}
                 <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
                     
                     <div style={{ flex: '1', minWidth: '350px' }}>
@@ -88,7 +116,7 @@ const ProductDetailPage = () => {
                         </div>
 
                         <button 
-                            onClick={() => navigate(`/auction-room/${asset.id}`)}
+                            onClick={() => navigate(`/asset/${asset.id}`)}
                             style={{ padding: '18px', backgroundColor: '#b71c1c', color: 'white', fontSize: '18px', fontWeight: '900', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(183, 28, 28, 0.3)', textTransform: 'uppercase', transition: 'background 0.3s' }}
                             onMouseEnter={(e) => e.target.style.backgroundColor = '#9b1414'}
                             onMouseLeave={(e) => e.target.style.backgroundColor = '#b71c1c'}
@@ -101,13 +129,50 @@ const ProductDetailPage = () => {
                     </div>
                 </div>
 
-                <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px solid #eee' }}>
-                    <h3 style={{ color: '#333', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
-                        Chi tiết sản phẩm
-                    </h3>
-                    <div style={{ color: '#444', lineHeight: '1.8', fontSize: '16px', backgroundColor: '#fafafa', padding: '20px', borderRadius: '8px', border: '1px solid #eaeaea' }}>
-                        {asset.description || 'Chưa có mô tả chi tiết cho tài sản này.'}
+                {/* PHẦN DƯỚI: MÔ TẢ & THÔNG SỐ KỸ THUẬT */}
+                <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px solid #eee', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+                    
+                    {/* MÔ TẢ TÀI SẢN (CHIẾM 60% CHIỀU RỘNG) */}
+                    <div style={{ flex: '1.5', minWidth: '350px' }}>
+                        <h3 style={{ color: '#333', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
+                            Chi tiết sản phẩm
+                        </h3>
+                        <div style={{ color: '#444', lineHeight: '1.8', fontSize: '16px', backgroundColor: '#fafafa', padding: '20px', borderRadius: '8px', border: '1px solid #eaeaea', minHeight: '150px' }}>
+                            {asset.description || 'Chưa có mô tả chi tiết cho tài sản này.'}
+                        </div>
                     </div>
+
+                    {/* BẢNG THÔNG SỐ KỸ THUẬT ĐỘNG (CHIẾM 40% CHIỀU RỘNG) */}
+                    {specs && (
+                        <div style={{ flex: '1', minWidth: '300px' }}>
+                            <h3 style={{ color: '#333', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
+                                Thông số kỹ thuật
+                            </h3>
+                            <div style={{ border: '1px solid #eaeaea', borderRadius: '8px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '15px' }}>
+                                    <tbody>
+                                        {Object.entries(specs).map(([key, value], index) => (
+                                            <tr 
+                                                key={key} 
+                                                style={{ 
+                                                    backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa',
+                                                    borderBottom: '1px solid #eaeaea' 
+                                                }}
+                                            >
+                                                <td style={{ padding: '12px 15px', fontWeight: 'bold', color: '#555', width: '40%', borderRight: '1px solid #eaeaea' }}>
+                                                    {key}
+                                                </td>
+                                                <td style={{ padding: '12px 15px', color: '#333' }}>
+                                                    {value}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
 
             </div>
