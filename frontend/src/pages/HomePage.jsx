@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import CountdownTimer from '../components/CountdownTimer';
 
 const HomePage = () => {
     const [assets, setAssets] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,15 +32,22 @@ const HomePage = () => {
                     gap: '25px' 
                 }}>
                     {Array.isArray(assets) && assets.map(asset => (
-                        <div key={asset.id} style={{ 
-                            backgroundColor: '#fff', 
-                            borderRadius: '12px', 
-                            overflow: 'hidden', 
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.08)', 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            transition: 'transform 0.2s'
-                        }}>
+                        <div 
+                            key={asset.id} 
+                            onClick={() => navigate(`/asset/${asset.id}`)}
+                            style={{ 
+                                backgroundColor: '#fff', 
+                                borderRadius: '12px', 
+                                overflow: 'hidden', 
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.08)', 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                transition: 'transform 0.2s',
+                                cursor: 'pointer' 
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        >
                             <img 
                                 src={asset.image} 
                                 alt={asset.name} 
@@ -82,19 +90,18 @@ const HomePage = () => {
                                     <CountdownTimer endTime={asset.end_time} />
                                 </div>
                                 
-                                <Link to={`/asset/${asset.id}`} style={{ 
+                                <div style={{ 
                                     marginTop: 'auto', 
                                     textAlign: 'center', 
                                     background: '#b71c1c', 
                                     color: 'white', 
                                     padding: '12px', 
-                                    textDecoration: 'none', 
                                     borderRadius: '6px', 
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase'
                                 }}>
                                     Tham gia đấu giá ⚡
-                                </Link>
+                                </div>
                             </div>
                         </div>
                     ))}

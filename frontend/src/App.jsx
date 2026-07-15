@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import HistoryPage from './pages/HistoryPage';
 import WalletPage from './pages/WalletPage';
 import SellPage from './pages/SellPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 function App() {
   const isLoggedIn = !!localStorage.getItem('token');
@@ -26,6 +27,7 @@ function App() {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/sell" element={<SellPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
       </Routes>
     </BrowserRouter>
   );
