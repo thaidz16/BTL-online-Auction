@@ -34,7 +34,8 @@ const HomePage = () => {
                     {Array.isArray(assets) && assets.map(asset => (
                         <div 
                             key={asset.id} 
-                            onClick={() => navigate(`/asset/${asset.id}`)}
+                            // 1. SỬA Ở ĐÂY: Click thẻ -> Bay vào trang Chi tiết Sản phẩm
+                            onClick={() => navigate(`/product/${asset.id}`)}
                             style={{ 
                                 backgroundColor: '#fff', 
                                 borderRadius: '12px', 
@@ -90,16 +91,32 @@ const HomePage = () => {
                                     <CountdownTimer endTime={asset.end_time} />
                                 </div>
                                 
-                                <div style={{ 
-                                    marginTop: 'auto', 
-                                    textAlign: 'center', 
-                                    background: '#b71c1c', 
-                                    color: 'white', 
-                                    padding: '12px', 
-                                    borderRadius: '6px', 
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase'
-                                }}>
+                                {/* 2. SỬA Ở ĐÂY: Click nút đỏ -> Chặn nổi bọt -> Bay vào Phòng Đấu Giá */}
+                                <div 
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Phép thuật chặn nổi bọt ở đây!
+                                        navigate(`/asset/${asset.id}`);
+                                    }}
+                                    style={{ 
+                                        marginTop: 'auto', 
+                                        textAlign: 'center', 
+                                        background: '#b71c1c', 
+                                        color: 'white', 
+                                        padding: '12px', 
+                                        borderRadius: '6px', 
+                                        fontWeight: 'bold',
+                                        textTransform: 'uppercase',
+                                        transition: 'background 0.3s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.stopPropagation(); // Mượt mà hơn khi rê chuột
+                                        e.target.style.backgroundColor = '#9b1414';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.stopPropagation();
+                                        e.target.style.backgroundColor = '#b71c1c';
+                                    }}
+                                >
                                     Tham gia đấu giá ⚡
                                 </div>
                             </div>
