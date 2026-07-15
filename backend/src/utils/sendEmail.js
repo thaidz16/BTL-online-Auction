@@ -1,7 +1,7 @@
 const sendEmail = async (toEmail, subject, textContent) => {
     try {
         const apiKey = process.env.BREVO_API_KEY;
-        const senderEmail = process.env.EMAIL_USER; // Email em đăng ký Brevo
+        const senderEmail = process.env.EMAIL_USER; 
 
         // Đóng gói dữ liệu gửi cho Brevo
         const payload = {
@@ -11,7 +11,6 @@ const sendEmail = async (toEmail, subject, textContent) => {
             },
             to: [{ email: toEmail }],
             subject: subject,
-            // Brevo hỗ trợ HTML nên anh format lại text cho xuống dòng đẹp hơn
             htmlContent: `<p>${textContent.replace(/\n/g, '<br>')}</p>` 
         };
 
