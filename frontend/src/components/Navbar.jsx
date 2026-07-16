@@ -50,7 +50,7 @@ const Navbar = () => {
                         ⚙️ Quản trị
                     </Link>
                 )}
-                
+                <div id="google_translate_element"></div>
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '15px' }}>
                     {isLoggedIn ? (
                         <button onClick={handleLogout} style={{ color: '#b71c1c', background: 'white', padding: '8px 20px', borderRadius: '6px', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
