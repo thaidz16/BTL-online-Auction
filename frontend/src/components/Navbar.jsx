@@ -1,11 +1,19 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const Navbar = () => {
     const isLoggedIn = !!localStorage.getItem('token');
     const role = localStorage.getItem('role') || ''; 
 
+    const [currentLang, setCurrentLang] = useState('vi');
+
     useEffect(() => {
+        if (document.cookie.includes('googtrans=/vi/en')) {
+            setCurrentLang('en');
+        } else {
+            setCurrentLang('vi');
+        }
+
         if (!window.googleTranslateElementInit) {
             window.googleTranslateElementInit = () => {
                 new window.google.translate.TranslateElement({
@@ -30,7 +38,15 @@ const Navbar = () => {
 
     const handleLanguageChange = (e) => {
         const lang = e.target.value;
+        setCurrentLang(lang);
         
+        if (lang === 'vi') {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+            window.location.reload();
+            return;
+        }
+
         document.cookie = `googtrans=/vi/${lang}; path=/`;
         document.cookie = `googtrans=/vi/${lang}; path=/; domain=${window.location.hostname}`;
         
@@ -46,6 +62,7 @@ const Navbar = () => {
 
     return (
         <nav style={{ backgroundColor: '#b71c1c', color: 'white', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+            
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white', textDecoration: 'none', fontSize: '26px', fontWeight: '900', letterSpacing: '1px' }}>
                     <img src="/logo-navbar.png" alt="Logo Sàn" style={{ height: '60px', width: 'auto' }} />
@@ -78,6 +95,7 @@ const Navbar = () => {
                 )}
                 
                 <select 
+                    value={currentLang}
                     onChange={handleLanguageChange}
                     style={{
                         backgroundColor: '#fff',
