@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react'; 
+import { useEffect } from 'react';
+
 const Navbar = () => {
     const isLoggedIn = !!localStorage.getItem('token');
     const role = localStorage.getItem('role') || ''; 
 
+    // Vẫn gọi Google Translate như bình thường
     useEffect(() => {
         if (!window.googleTranslateElementInit) {
             window.googleTranslateElementInit = () => {
@@ -27,6 +29,17 @@ const Navbar = () => {
         window.location.href = '/';
     };
 
+    // TUYỆT CHIÊU PROXY: Lấy giá trị từ nút Fake chọc vào nút thật của Google
+    const handleLanguageChange = (e) => {
+        const lang = e.target.value; // Lấy 'en' hoặc 'vi'
+        const googleSelect = document.querySelector('.goog-te-combo'); // Tìm cái nút bị ẩn của Google
+        
+        if (googleSelect) {
+            googleSelect.value = lang; // Đổi giá trị của nó
+            googleSelect.dispatchEvent(new Event('change')); // Ép nó chạy sự kiện đổi ngôn ngữ
+        }
+    };
+
     return (
         <nav style={{ backgroundColor: '#b71c1c', color: 'white', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
             
@@ -47,7 +60,6 @@ const Navbar = () => {
                     📞 0961.590.214
                 </span>
                 
-                {/* NHỮNG NÚT NÀY CHỈ HIỆN KHI ĐÃ ĐĂNG NHẬP (USER HOẶC ADMIN ĐỀU THẤY) */}
                 {isLoggedIn && (
                     <>
                         <Link to="/history" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Lịch sử</Link>
@@ -58,15 +70,34 @@ const Navbar = () => {
                     </>
                 )}
 
-                {/* NÚT NÀY CHỈ HIỆN KHI LÀ ADMIN (Dùng toLowerCase để xử lý vụ chữ hoa/thường) */}
                 {role.toLowerCase() === 'admin' && (
                     <Link to="/admin" style={{ color: 'white', backgroundColor: '#333', padding: '6px 15px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', marginLeft: '10px' }}>
                         ⚙️ Quản trị
                     </Link>
                 )}
                 
-                {/* CHỖ ĐỨNG CỦA CÁI NÚT DỊCH NẰM ĐÂY NÈ SẾP */}
-                <div id="google_translate_element" style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}></div>
+                {/* 1. ĐÂY LÀ CÁI NÚT CHÚNG TA TỰ VẼ ĐỂ CHE MẮT NGƯỜI DÙNG */}
+                <select 
+                    onChange={handleLanguageChange}
+                    style={{
+                        backgroundColor: '#fff',
+                        color: '#b71c1c',
+                        border: 'none',
+                        borderRadius: '20px',
+                        padding: '6px 12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        marginLeft: '10px',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+
+                {/* 2. CHÚNG TA SẼ ÉP CÁI THẺ CỦA GOOGLE TÀNG HÌNH Ở BƯỚC CSS */}
+                <div id="google_translate_element"></div>
 
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '15px' }}>
                     {isLoggedIn ? (

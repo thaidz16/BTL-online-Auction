@@ -1,33 +1,14 @@
-/* 1. Tiêu diệt thanh Banner trên cùng */
+/* Tắt toàn bộ Banner trên cùng của Google */
 .VIpgJd-ZVi9od-ORHb-OEVmcd,
-.goog-te-banner-frame.skiptranslate {
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget-simple {
     display: none !important;
 }
 body {
     top: 0px !important; 
 }
 
-/* 2. Xóa sạch dấu vết chữ "Powered by Google" và Logo */
-.goog-te-gadget {
-    font-size: 0px !important; /* Thu nhỏ chữ về 0 để mất khoảng trắng */
-    color: transparent !important;
-}
-.goog-te-gadget .goog-logo-link {
+/* Ẩn hoàn toàn cái vùng div gốc của Google Translate */
+#google_translate_element {
     display: none !important;
-}
-
-/* 3. Phẫu thuật nút Chọn ngôn ngữ xịn xò (Bo tròn giống nút Số điện thoại của em) */
-.goog-te-combo {
-    background-color: #fff !important;
-    color: #b71c1c !important; /* Chữ màu đỏ đô */
-    border: 1px solid #fff !important;
-    border-radius: 20px !important; /* Bo tròn cực mạnh cho sang */
-    padding: 6px 15px !important;
-    font-weight: 900 !important;
-    cursor: pointer !important;
-    outline: none !important;
-    font-family: inherit !important;
-    font-size: 15px !important;
-    margin: 0 !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
 }
