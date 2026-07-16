@@ -1,4 +1,4 @@
-/* Tắt toàn bộ Banner trên cùng của Google */
+/* 1. Tiêu diệt thanh Banner trên cùng của Google */
 .VIpgJd-ZVi9od-ORHb-OEVmcd,
 .goog-te-banner-frame.skiptranslate,
 .goog-te-gadget-simple {
@@ -8,7 +8,13 @@ body {
     top: 0px !important; 
 }
 
-/* Ẩn hoàn toàn cái vùng div gốc của Google Translate */
+/* 2. TUYỆT CHIÊU: Giữ cho Google vẫn hoạt động nhưng bay ra ngoài màn hình */
 #google_translate_element {
-    display: none !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
