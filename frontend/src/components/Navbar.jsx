@@ -1,21 +1,15 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react'; // Bắt buộc phải import useEffect để dùng nha
-
+import { useEffect } from 'react'; 
 const Navbar = () => {
-    // Kiểm tra xem user có token không (đã đăng nhập chưa)
     const isLoggedIn = !!localStorage.getItem('token');
-    
-    // Lấy role từ kho ra. Dùng || '' để lỡ chưa đăng nhập nó không bị lỗi
     const role = localStorage.getItem('role') || ''; 
 
-    // BÙA CHÚ ĐỘ ĐA NGÔN NGỮ CHUẨN REACT (Tự động chạy 1 lần khi Navbar load)
     useEffect(() => {
         if (!window.googleTranslateElementInit) {
             window.googleTranslateElementInit = () => {
                 new window.google.translate.TranslateElement({
                     pageLanguage: 'vi',
-                    includedLanguages: 'en,vi',
-                    layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+                    includedLanguages: 'en,vi'
                 }, 'google_translate_element');
             };
 
@@ -29,7 +23,7 @@ const Navbar = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('role'); // Nhớ xóa cả role khi đăng xuất
+        localStorage.removeItem('role');
         window.location.href = '/';
     };
 
