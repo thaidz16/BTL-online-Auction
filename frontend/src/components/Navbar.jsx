@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react'; // Bắt buộc phải import useEffect để dùng nha
 
 const Navbar = () => {
     // Kiểm tra xem user có token không (đã đăng nhập chưa)
@@ -6,6 +7,25 @@ const Navbar = () => {
     
     // Lấy role từ kho ra. Dùng || '' để lỡ chưa đăng nhập nó không bị lỗi
     const role = localStorage.getItem('role') || ''; 
+
+    // BÙA CHÚ ĐỘ ĐA NGÔN NGỮ CHUẨN REACT (Tự động chạy 1 lần khi Navbar load)
+    useEffect(() => {
+        if (!window.googleTranslateElementInit) {
+            window.googleTranslateElementInit = () => {
+                new window.google.translate.TranslateElement({
+                    pageLanguage: 'vi',
+                    includedLanguages: 'en,vi',
+                    layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+                }, 'google_translate_element');
+            };
+
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -50,7 +70,10 @@ const Navbar = () => {
                         ⚙️ Quản trị
                     </Link>
                 )}
-                <div id="google_translate_element"></div>
+                
+                {/* CHỖ ĐỨNG CỦA CÁI NÚT DỊCH NẰM ĐÂY NÈ SẾP */}
+                <div id="google_translate_element" style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}></div>
+
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '15px' }}>
                     {isLoggedIn ? (
                         <button onClick={handleLogout} style={{ color: '#b71c1c', background: 'white', padding: '8px 20px', borderRadius: '6px', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
