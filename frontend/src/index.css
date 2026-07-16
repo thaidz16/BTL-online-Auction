@@ -1,23 +1,30 @@
-/* Tắt cái thanh Topbar dịch xấu xí của Google */
-.VIpgJd-ZVi9od-ORHb-OEVmcd {
-    display: none !important;
-}
-.skiptranslate iframe {
+/* 1. Tiêu diệt thanh Banner trên cùng nhưng KHÔNG giết cái nút */
+.goog-te-banner-frame.skiptranslate {
     display: none !important;
 }
 body {
-    top: 0 !important;
+    top: 0px !important; 
 }
 
-/* Decor lại cái nút chọn ngôn ngữ cho nó khớp với Navbar */
-#google_translate_element select {
+/* 2. Xóa chữ "Powered by Google" và logo để nhìn web chuyên nghiệp (White-label) */
+.goog-logo-link {
+    display: none !important;
+}
+.goog-te-gadget {
+    color: transparent !important;
+}
+
+/* 3. Phẫu thuật thẩm mỹ lại cái nút (Dropdown) cho xịn */
+.goog-te-combo {
     background-color: #fff;
-    color: #333;
+    color: #b71c1c; /* Chữ màu đỏ đô chuẩn Phenikaa */
     border: 1px solid #ccc;
     border-radius: 6px;
-    padding: 6px 10px;
+    padding: 6px 12px;
     font-weight: bold;
     cursor: pointer;
     outline: none;
     font-family: inherit;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
