@@ -5,7 +5,6 @@ const Navbar = () => {
     const isLoggedIn = !!localStorage.getItem('token');
     const role = localStorage.getItem('role') || ''; 
 
-    // Vẫn gọi Google Translate như bình thường
     useEffect(() => {
         if (!window.googleTranslateElementInit) {
             window.googleTranslateElementInit = () => {
@@ -29,21 +28,24 @@ const Navbar = () => {
         window.location.href = '/';
     };
 
-    // TUYỆT CHIÊU PROXY: Lấy giá trị từ nút Fake chọc vào nút thật của Google
     const handleLanguageChange = (e) => {
-        const lang = e.target.value; // Lấy 'en' hoặc 'vi'
-        const googleSelect = document.querySelector('.goog-te-combo'); // Tìm cái nút bị ẩn của Google
+        const lang = e.target.value;
+        
+        document.cookie = `googtrans=/vi/${lang}; path=/`;
+        document.cookie = `googtrans=/vi/${lang}; path=/; domain=${window.location.hostname}`;
+        
+        const googleSelect = document.querySelector('.goog-te-combo'); 
         
         if (googleSelect) {
-            googleSelect.value = lang; // Đổi giá trị của nó
-            googleSelect.dispatchEvent(new Event('change')); // Ép nó chạy sự kiện đổi ngôn ngữ
+            googleSelect.value = lang; 
+            googleSelect.dispatchEvent(new Event('change'));
+        } else {
+            window.location.reload();
         }
     };
 
     return (
         <nav style={{ backgroundColor: '#b71c1c', color: 'white', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-            
-            {/* Cụm Logo & Tên sàn */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white', textDecoration: 'none', fontSize: '26px', fontWeight: '900', letterSpacing: '1px' }}>
                     <img src="/logo-navbar.png" alt="Logo Sàn" style={{ height: '60px', width: 'auto' }} />
@@ -54,7 +56,6 @@ const Navbar = () => {
                 </span>
             </div>
 
-            {/* Cụm Menu Phải */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ fontWeight: 'bold', fontSize: '18px', backgroundColor: 'white', color: '#b71c1c', padding: '5px 15px', borderRadius: '20px', marginRight: '10px' }}>
                     📞 0961.590.214
@@ -76,7 +77,6 @@ const Navbar = () => {
                     </Link>
                 )}
                 
-                {/* 1. ĐÂY LÀ CÁI NÚT CHÚNG TA TỰ VẼ ĐỂ CHE MẮT NGƯỜI DÙNG */}
                 <select 
                     onChange={handleLanguageChange}
                     style={{
@@ -96,7 +96,6 @@ const Navbar = () => {
                     <option value="en">🇬🇧 English</option>
                 </select>
 
-                {/* 2. CHÚNG TA SẼ ÉP CÁI THẺ CỦA GOOGLE TÀNG HÌNH Ở BƯỚC CSS */}
                 <div id="google_translate_element"></div>
 
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '15px' }}>
