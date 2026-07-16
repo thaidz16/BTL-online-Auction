@@ -27,7 +27,7 @@ const AssetDetailPage = () => {
         historyEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [bidHistory]);
 
-    // 1. KÉO DỮ LIỆU TÀI SẢN LÚC MỚI VÀO PHÒNG
+    // KÉO DỮ LIỆU TÀI SẢN LÚC MỚI VÀO PHÒNG
     useEffect(() => {
         window.scrollTo(0, 0); // Ép cuộn lên đầu
 
@@ -45,7 +45,7 @@ const AssetDetailPage = () => {
         fetchAsset();
     }, [id]);
 
-    // 2. KÍCH HOẠT SIÊU NĂNG LỰC REAL-TIME (SOCKET.IO)
+    // KÍCH HOẠT SIÊU NĂNG LỰC REAL-TIME (SOCKET.IO)
     useEffect(() => {
         socket.on('new_bid_update', (data) => {
             if (data.session_id == id) {
@@ -74,7 +74,7 @@ const AssetDetailPage = () => {
         setBidAmount(currentPrice + amountToAdd);
     };
 
-    // 3. HÀM CHỐT GIÁ BẮN LÊN SERVER
+    // HÀM CHỐT GIÁ BẮN LÊN SERVER
     const handleBidSubmit = async () => {
         if (!bidAmount || isNaN(bidAmount) || bidAmount <= currentPrice) {
             toast.error("Giá đưa ra phải lớn hơn giá hiện tại!");
@@ -86,7 +86,7 @@ const AssetDetailPage = () => {
         // Bắn tín hiệu đặt giá qua Socket
         socket.emit('place_bid', { session_id: id, amount: bidAmount });
         
-        // Tự update lịch sử của chính mình lên giao diện cho nhanh (Optimistic UI)
+        // Tự update lịch sử của chính mình lên giao diện cho nhanh
         setBidHistory(prev => [...prev, { 
             user: 'Bạn (Vừa ra giá)', 
             amount: bidAmount, 
@@ -99,6 +99,19 @@ const AssetDetailPage = () => {
         }, 1000);
     };
 
+    // HÀM DỊCH JSON THÔNG SỐ KỸ THUẬT (An toàn chống crash)
+    const getSpecs = () => {
+        if (!asset || !asset.specifications) return null;
+        try {
+            return typeof asset.specifications === 'string' 
+                ? JSON.parse(asset.specifications) 
+                : asset.specifications;
+        } catch (e) {
+            console.error("Lỗi parse JSON thông số kỹ thuật:", e);
+            return null;
+        }
+    };
+
     if (!asset) {
         return (
             <div style={{ backgroundColor: '#121212', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -106,6 +119,8 @@ const AssetDetailPage = () => {
             </div>
         );
     }
+
+    const specs = getSpecs();
 
     return (
         <div style={{ backgroundColor: '#121212', minHeight: '100vh', padding: '20px', color: '#fff', fontFamily: 'monospace, sans-serif' }}>
@@ -202,6 +217,52 @@ const AssetDetailPage = () => {
 
                 </div>
             </div>
+
+            {/* BƯỚC CẢI TIẾN: PHẦN DƯỚI - MÔ TẢ & THÔNG SỐ KỸ THUẬT DARK MODE */}
+            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px dashed #333', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+                
+                {/* MÔ TẢ TÀI SẢN */}
+                <div style={{ flex: '1.5', minWidth: '350px' }}>
+                    <h3 style={{ color: '#f5f5f5', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
+                        📖 Chi tiết sản phẩm
+                    </h3>
+                    <div style={{ color: '#ccc', lineHeight: '1.8', fontSize: '16px', backgroundColor: '#1e1e1e', padding: '20px', borderRadius: '8px', border: '1px solid #333', minHeight: '150px' }}>
+                        {asset.description || 'Chưa có mô tả chi tiết cho tài sản này.'}
+                    </div>
+                </div>
+
+                {/* BẢNG THÔNG SỐ KỸ THUẬT ĐỘNG */}
+                {specs && (
+                    <div style={{ flex: '1', minWidth: '300px' }}>
+                        <h3 style={{ color: '#f5f5f5', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
+                            ⚙️ Thông số kỹ thuật
+                        </h3>
+                        <div style={{ border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '15px' }}>
+                                <tbody>
+                                    {Object.entries(specs).map(([key, value], index) => (
+                                        <tr 
+                                            key={key} 
+                                            style={{ 
+                                                backgroundColor: index % 2 === 0 ? '#1e1e1e' : '#2a2a2a',
+                                                borderBottom: '1px solid #333' 
+                                            }}
+                                        >
+                                            <td style={{ padding: '12px 15px', fontWeight: 'bold', color: '#aaa', width: '40%', borderRight: '1px solid #333' }}>
+                                                {key}
+                                            </td>
+                                            <td style={{ padding: '12px 15px', color: '#f5f5f5' }}>
+                                                {value}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+            </div>
+            
         </div>
     );
 };
