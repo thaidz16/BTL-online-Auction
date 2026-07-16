@@ -182,3 +182,26 @@
     border-right-color: var(--border);
   }
 } */
+/* Tắt cái thanh Topbar dịch xấu xí của Google */
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none !important;
+}
+.skiptranslate iframe {
+    display: none !important;
+}
+body {
+    top: 0 !important;
+}
+
+/* Decor lại cái nút chọn ngôn ngữ cho nó khớp với Navbar */
+#google_translate_element select {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+}
