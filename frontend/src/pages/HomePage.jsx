@@ -9,113 +9,94 @@ const HomePage = () => {
     const [likedItems, setLikedItems] = useState([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchAssets = async () => {
-            try {
-                const response = await api.get('/assets');
-                const actualData = response.data.data || response.data;
-                
-                if (Array.isArray(actualData)) {
-                    setAssets(actualData);
-                } else {
-                    console.error(actualData);
-                    setAssets([]); 
-                }
-            } catch (error) {
-                console.error(error);
-                setAssets([]);
-            }
-        };
-        fetchAssets();
-    }, []);
-
-    const toggleLike = (id) => {
-        setLikedItems(prev =>
-            prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
-        );
+    const toggleLike = (e, id) => {
+        e.stopPropagation();
+        if (likedItems.includes(id)) {
+            setLikedItems(likedItems.filter(itemId => itemId !== id));
+        } else {
+            setLikedItems([...likedItems, id]);
+        }
     };
 
-    const categories = [
-        { id: 1, name: 'Điện tử', icon: '💻' },
-        { id: 2, name: 'Đồng hồ', icon: '⌚' },
-        { id: 3, name: 'Trang sức', icon: '💎' },
-        { id: 4, name: 'Đồ cổ', icon: '🏺' },
-        { id: 5, name: 'Túi xách', icon: '👜' },
-        { id: 6, name: 'Giày dép', icon: '👟' },
-    ];
-
-    const trends = [
-        { id: 1, name: 'MacBook Pro M3', searches: '+1.2k lượt tìm' },
-        { id: 2, name: 'Rolex Submariner', searches: '+850 lượt tìm' },
-        { id: 3, name: 'iPhone 15 Pro Max', searches: '+3.4k lượt tìm' },
-        { id: 4, name: 'Zippo cổ', searches: '+500 lượt tìm' },
-    ];
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await api.get('/assets');
+                setAssets(res.data.data || res.data); 
+            } catch (error) {
+                console.error("Lỗi lấy dữ liệu:", error);
+            }
+        };
+        fetchData();
+    }, []);
 
     return (
         <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '40px 20px' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                
                 <HeroBanner />
 
-                <div style={{ backgroundColor: '#fff', padding: '20px 25px', borderRadius: '12px', marginBottom: '25px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                    <h2 style={{ fontSize: '18px', marginBottom: '20px', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '24px' }}>🔥</span> Danh mục phổ biến
-                    </h2>
-                    <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '10px' }}>
-                        {categories.map(cat => (
-                            <div key={cat.id} style={{ minWidth: '130px', textAlign: 'center', cursor: 'pointer', padding: '20px 15px', border: '1px solid #eaeaea', borderRadius: '10px', transition: 'all 0.2s', backgroundColor: '#fafafa' }}>
-                                <div style={{ fontSize: '32px', marginBottom: '12px' }}>{cat.icon}</div>
-                                <div style={{ fontSize: '14px', fontWeight: '600', color: '#444' }}>{cat.name}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div style={{ backgroundColor: '#fff', padding: '20px 25px', borderRadius: '12px', marginBottom: '45px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                    <h2 style={{ fontSize: '18px', marginBottom: '20px', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '24px' }}>📈</span> Xu hướng tìm kiếm
-                    </h2>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        {trends.map(trend => (
-                            <div key={trend.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 20px', border: '1px solid #eaeaea', borderRadius: '30px', cursor: 'pointer', backgroundColor: '#fafafa', transition: 'all 0.2s' }}>
-                                <span style={{ fontWeight: '600', color: '#333', fontSize: '15px' }}>{trend.name}</span>
-                                <span style={{ fontSize: '13px', color: '#888' }}>{trend.searches}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <h1 style={{ color: '#333', borderBottom: '3px solid #b71c1c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px', fontSize: '22px' }}>
+                <h1 style={{ color: '#333', borderBottom: '3px solid #b71c1c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>
                     TÀI SẢN ĐANG ĐẤU GIÁ
                 </h1>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                    {assets.map((item) => {
-                        const isLiked = likedItems.includes(item.id);
-                        const mockBids = item.bidCount || Math.floor(Math.random() * 50) + 10;
-                        const price = item.starting_price || item.price || item.startPrice || 0;
-                        const imageUrl = item.image_url || item.image || item.thumbnail || 'https://placehold.co/400x300?text=Chua+Co+Anh';
-                        const name = item.name || item.title || item.productName || 'Sản phẩm đang cập nhật';
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+                    gap: '25px' 
+                }}>
+                    {Array.isArray(assets) && assets.map(asset => {
+                        const isLiked = likedItems.includes(asset.id);
+                        const mockBids = asset.bidCount || Math.floor(Math.random() * 50) + 10;
 
                         return (
-                            <div key={item.id || Math.random()} style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', border: '1px solid #f0f0f0' }}>
-                                
-                                <div style={{ position: 'relative', width: '100%', height: '240px', backgroundColor: '#f8f9fa' }}>
-                                    <img src={imageUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    
+                            <div 
+                                key={asset.id} 
+                                onClick={() => navigate(`/product/${asset.id}`)}
+                                style={{ 
+                                    backgroundColor: '#fff', 
+                                    borderRadius: '12px', 
+                                    overflow: 'hidden', 
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)', 
+                                    display: 'flex', 
+                                    flexDirection: 'column',
+                                    transition: 'transform 0.2s',
+                                    cursor: 'pointer' 
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
+                                <div style={{ position: 'relative', width: '100%', height: '220px' }}>
+                                    <img 
+                                        src={asset.image} 
+                                        alt={asset.name} 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://placehold.co/600x400/ececec/999999?text=Phenikaa+Auction'; 
+                                        }}
+                                    />
                                     <div style={{ position: 'absolute', bottom: '10px', left: '10px', backgroundColor: 'rgba(0,0,0,0.65)', color: 'white', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', backdropFilter: 'blur(4px)' }}>
                                         🔨 {mockBids} Lượt đấu giá
                                     </div>
                                 </div>
                                 
-                                <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                                        <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '5px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
-                                            Tịch thu hải quan
+                                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                        <span style={{
+                                            backgroundColor: '#fff3e0',
+                                            color: '#e65100',
+                                            padding: '5px 12px',
+                                            borderRadius: '20px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold',
+                                            border: '1px solid #ffe0b2'
+                                        }}>
+                                            🔥 {asset.condition_tag || 'Đang cập nhật'}
                                         </span>
                                         
                                         <button 
-                                            onClick={() => item.id && toggleLike(item.id)}
+                                            onClick={(e) => toggleLike(e, asset.id)}
                                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
                                             <svg width="22" height="22" viewBox="0 0 24 24" fill={isLiked ? "#ff4757" : "none"} stroke={isLiked ? "#ff4757" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.2s ease' }}>
@@ -124,24 +105,49 @@ const HomePage = () => {
                                         </button>
                                     </div>
 
-                                    <h3 style={{ fontSize: '16px', margin: '0 0 10px 0', color: '#2b2b2b', flex: 1, lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                        {name}
+                                    <h3 style={{ fontSize: '1.2rem', margin: '0 0 15px 0', color: '#222', height: '55px', overflow: 'hidden' }}>
+                                        {asset.name}
                                     </h3>
-                                    
-                                    <div style={{ marginBottom: '15px' }}>
-                                        <span style={{ color: '#d32f2f', fontSize: '20px', fontWeight: '900' }}>
-                                            {price.toLocaleString()} VNĐ
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', alignItems: 'center' }}>
+                                        <span style={{ color: '#777', fontSize: '0.9rem' }}>💲 Giá hiện tại:</span>
+                                        <span style={{ fontWeight: '900', color: '#b71c1c', fontSize: '1.1rem' }}>
+                                            {Number(asset.current_price || 0).toLocaleString('vi-VN')} đ
                                         </span>
                                     </div>
-
-                                    {item.end_time && <CountdownTimer endTime={item.end_time} />}
-
-                                    <button 
-                                        onClick={() => item.id && navigate(`/product/${item.id}`)}
-                                        style={{ width: '100%', padding: '12px', backgroundColor: '#d32f2f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', marginTop: '16px', transition: 'background-color 0.2s', textTransform: 'uppercase' }}
+                                    
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
+                                        <span style={{ color: '#777', fontSize: '0.9rem' }}>⏱️ Còn lại:</span>
+                                        <CountdownTimer endTime={asset.end_time} />
+                                    </div>
+                                    
+                                    <div 
+                                        onClick={(e) => {
+                                            e.stopPropagation(); 
+                                            navigate(`/asset/${asset.id}`);
+                                        }}
+                                        style={{ 
+                                            marginTop: 'auto', 
+                                            textAlign: 'center', 
+                                            background: '#b71c1c', 
+                                            color: 'white', 
+                                            padding: '12px', 
+                                            borderRadius: '6px', 
+                                            fontWeight: 'bold',
+                                            textTransform: 'uppercase',
+                                            transition: 'background 0.3s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.stopPropagation(); 
+                                            e.target.style.backgroundColor = '#9b1414';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.stopPropagation();
+                                            e.target.style.backgroundColor = '#b71c1c';
+                                        }}
                                     >
-                                        Tham gia đấu giá
-                                    </button>
+                                        Tham gia đấu giá ⚡
+                                    </div>
                                 </div>
                             </div>
                         );
