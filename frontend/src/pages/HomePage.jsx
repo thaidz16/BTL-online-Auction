@@ -6,124 +6,131 @@ import HeroBanner from '../components/HeroBanner';
 
 const HomePage = () => {
     const [assets, setAssets] = useState([]);
+    const [likedItems, setLikedItems] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAssets = async () => {
             try {
-                const res = await api.get('/assets');
-                setAssets(res.data.data || res.data); 
+                const response = await api.get('/assets');
+                setAssets(response.data);
             } catch (error) {
-                console.error("Lỗi lấy dữ liệu:", error);
+                console.error(error);
             }
         };
-        fetchData();
+        fetchAssets();
     }, []);
+
+    const toggleLike = (id) => {
+        setLikedItems(prev =>
+            prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
+        );
+    };
+
+    const categories = [
+        { id: 1, name: 'Điện tử', icon: '💻' },
+        { id: 2, name: 'Đồng hồ', icon: '⌚' },
+        { id: 3, name: 'Trang sức', icon: '💎' },
+        { id: 4, name: 'Đồ cổ', icon: '🏺' },
+        { id: 5, name: 'Túi xách', icon: '👜' },
+        { id: 6, name: 'Giày dép', icon: '👟' },
+    ];
+
+    const trends = [
+        { id: 1, name: 'MacBook Pro M3', searches: '+1.2k lượt tìm' },
+        { id: 2, name: 'Rolex Submariner', searches: '+850 lượt tìm' },
+        { id: 3, name: 'iPhone 15 Pro Max', searches: '+3.4k lượt tìm' },
+        { id: 4, name: 'Zippo cổ', searches: '+500 lượt tìm' },
+    ];
 
     return (
         <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '40px 20px' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                 <HeroBanner />
-                <h1 style={{ color: '#333', borderBottom: '3px solid #b71c1c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>
+
+                <div style={{ backgroundColor: '#fff', padding: '20px 25px', borderRadius: '12px', marginBottom: '25px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <h2 style={{ fontSize: '18px', marginBottom: '20px', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '24px' }}>🔥</span> Danh mục phổ biến
+                    </h2>
+                    <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '10px' }}>
+                        {categories.map(cat => (
+                            <div key={cat.id} style={{ minWidth: '130px', textAlign: 'center', cursor: 'pointer', padding: '20px 15px', border: '1px solid #eaeaea', borderRadius: '10px', transition: 'all 0.2s', backgroundColor: '#fafafa' }}>
+                                <div style={{ fontSize: '32px', marginBottom: '12px' }}>{cat.icon}</div>
+                                <div style={{ fontSize: '14px', fontWeight: '600', color: '#444' }}>{cat.name}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={{ backgroundColor: '#fff', padding: '20px 25px', borderRadius: '12px', marginBottom: '45px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <h2 style={{ fontSize: '18px', marginBottom: '20px', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '24px' }}>📈</span> Xu hướng tìm kiếm
+                    </h2>
+                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                        {trends.map(trend => (
+                            <div key={trend.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 20px', border: '1px solid #eaeaea', borderRadius: '30px', cursor: 'pointer', backgroundColor: '#fafafa', transition: 'all 0.2s' }}>
+                                <span style={{ fontWeight: '600', color: '#333', fontSize: '15px' }}>{trend.name}</span>
+                                <span style={{ fontSize: '13px', color: '#888' }}>{trend.searches}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <h1 style={{ color: '#333', borderBottom: '3px solid #b71c1c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px', fontSize: '22px' }}>
                     TÀI SẢN ĐANG ĐẤU GIÁ
                 </h1>
 
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-                    gap: '25px' 
-                }}>
-                    {Array.isArray(assets) && assets.map(asset => (
-                        <div 
-                            key={asset.id} 
-                            // 1. SỬA Ở ĐÂY: Click thẻ -> Bay vào trang Chi tiết Sản phẩm
-                            onClick={() => navigate(`/product/${asset.id}`)}
-                            style={{ 
-                                backgroundColor: '#fff', 
-                                borderRadius: '12px', 
-                                overflow: 'hidden', 
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.08)', 
-                                display: 'flex', 
-                                flexDirection: 'column',
-                                transition: 'transform 0.2s',
-                                cursor: 'pointer' 
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        >
-                            <img 
-                                src={asset.image} 
-                                alt={asset.name} 
-                                style={{ width: '100%', height: '220px', objectFit: 'cover' }} 
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = 'https://placehold.co/600x400/ececec/999999?text=Phenikaa+Auction'; 
-                                }}
-                            />
-                            
-                            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                                <h3 style={{ fontSize: '1.2rem', margin: '0 0 15px 0', color: '#222', height: '55px', overflow: 'hidden' }}>
-                                    {asset.name}
-                                </h3>
-                                
-                                <span style={{
-                                    display: 'inline-block',
-                                    backgroundColor: '#fff3e0',
-                                    color: '#e65100',
-                                    padding: '5px 12px',
-                                    borderRadius: '20px',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 'bold',
-                                    marginBottom: '15px',
-                                    width: 'fit-content',
-                                    border: '1px solid #ffe0b2'
-                                }}>
-                                    🔥 {asset.condition_tag || 'Đang cập nhật'}
-                                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                    {assets.map((item) => {
+                        const isLiked = likedItems.includes(item.id);
+                        const mockBids = Math.floor(Math.random() * 50) + 10;
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', alignItems: 'center' }}>
-                                    <span style={{ color: '#777', fontSize: '0.9rem' }}>💲 Giá hiện tại:</span>
-                                    <span style={{ fontWeight: '900', color: '#b71c1c', fontSize: '1.1rem' }}>
-                                        {Number(asset.current_price || 0).toLocaleString('vi-VN')} đ
-                                    </span>
+                        return (
+                            <div key={item.id} style={{ backgroundColor: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 3px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s' }}>
+                                <div style={{ position: 'relative' }}>
+                                    <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
                                 </div>
                                 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
-                                    <span style={{ color: '#777', fontSize: '0.9rem' }}>⏱️ Còn lại:</span>
-                                    <CountdownTimer endTime={asset.end_time} />
-                                </div>
-                                
-                                {/* 2. SỬA Ở ĐÂY: Click nút đỏ -> Chặn nổi bọt -> Bay vào Phòng Đấu Giá */}
-                                <div 
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Phép thuật chặn nổi bọt ở đây!
-                                        navigate(`/asset/${asset.id}`);
-                                    }}
-                                    style={{ 
-                                        marginTop: 'auto', 
-                                        textAlign: 'center', 
-                                        background: '#b71c1c', 
-                                        color: 'white', 
-                                        padding: '12px', 
-                                        borderRadius: '6px', 
-                                        fontWeight: 'bold',
-                                        textTransform: 'uppercase',
-                                        transition: 'background 0.3s'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.stopPropagation(); // Mượt mà hơn khi rê chuột
-                                        e.target.style.backgroundColor = '#9b1414';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.stopPropagation();
-                                        e.target.style.backgroundColor = '#b71c1c';
-                                    }}
-                                >
-                                    Tham gia đấu giá ⚡
+                                <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                                        <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold' }}>
+                                            Tịch thu hải quan
+                                        </span>
+                                        
+                                        <button 
+                                            onClick={() => toggleLike(item.id)}
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        >
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? "#ff4757" : "none"} stroke={isLiked ? "#ff4757" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.2s ease' }}>
+                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <h3 style={{ fontSize: '17px', margin: '0 0 12px 0', color: '#222', flex: 1, lineHeight: '1.4' }}>{item.name}</h3>
+                                    
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <span style={{ color: '#b71c1c', fontSize: '20px', fontWeight: '900' }}>
+                                            {item.starting_price.toLocaleString()} VNĐ
+                                        </span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', fontSize: '14px', color: '#555' }}>
+                                        <span>🔨 Lượt đấu giá: <strong style={{ color: '#222' }}>{item.bidCount || mockBids}</strong></span>
+                                    </div>
+
+                                    <CountdownTimer endTime={item.end_time} />
+
+                                    <button 
+                                        onClick={() => navigate(`/product/${item.id}`)}
+                                        style={{ width: '100%', padding: '12px', backgroundColor: '#b71c1c', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '18px', transition: 'background-color 0.2s' }}
+                                    >
+                                        Tham gia đấu giá
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>

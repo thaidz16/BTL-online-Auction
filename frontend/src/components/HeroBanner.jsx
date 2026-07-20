@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 
 const HeroBanner = () => {
     const banners = [
-        "https://images.unsplash.com/photo-1531297122539-5692f69f4ea5?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=2080&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1607082349566-187342175e2f?q=80&w=2070&auto=format&fit=crop"
+        "/banner1.png",
+        "/banner2.png",
+        "/banner3.png"
     ];
 
     const [currentIndex, setCurrentIndex] = useState(0);
