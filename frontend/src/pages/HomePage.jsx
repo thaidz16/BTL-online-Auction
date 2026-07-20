@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import CountdownTimer from '../components/CountdownTimer';
+import HeroBanner from '../components/HeroBanner';
 
 const HomePage = () => {
     const [assets, setAssets] = useState([]);
@@ -22,6 +23,7 @@ const HomePage = () => {
     return (
         <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '40px 20px' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                <HeroBanner />
                 <h1 style={{ color: '#333', borderBottom: '3px solid #b71c1c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>
                     TÀI SẢN ĐANG ĐẤU GIÁ
                 </h1>
