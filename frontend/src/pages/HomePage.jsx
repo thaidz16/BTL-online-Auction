@@ -91,20 +91,26 @@ const HomePage = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
                     {assets.map((item) => {
                         const isLiked = likedItems.includes(item.id);
-                        const mockBids = Math.floor(Math.random() * 50) + 10;
-                        const price = item.starting_price || 0;
-                        const imageUrl = item.image_url || 'https://via.placeholder.com/300';
-                        const name = item.name || 'Tài sản đang cập nhật';
+                        const mockBids = item.bidCount || Math.floor(Math.random() * 50) + 10;
+                        const price = item.starting_price || item.price || item.startPrice || 0;
+                        const imageUrl = item.image_url || item.image || item.thumbnail || 'https://placehold.co/400x300?text=Chua+Co+Anh';
+                        const name = item.name || item.title || item.productName || 'Sản phẩm đang cập nhật';
 
                         return (
-                            <div key={item.id || Math.random()} style={{ backgroundColor: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 3px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s' }}>
-                                <div style={{ position: 'relative' }}>
-                                    <img src={imageUrl} alt={name} style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+                            <div key={item.id || Math.random()} style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', border: '1px solid #f0f0f0' }}>
+                                
+                                <div style={{ position: 'relative', width: '100%', height: '240px', backgroundColor: '#f8f9fa' }}>
+                                    <img src={imageUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    
+                                    <div style={{ position: 'absolute', bottom: '10px', left: '10px', backgroundColor: 'rgba(0,0,0,0.65)', color: 'white', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', backdropFilter: 'blur(4px)' }}>
+                                        🔨 {mockBids} Lượt đấu giá
+                                    </div>
                                 </div>
                                 
-                                <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                    
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                                        <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold' }}>
+                                        <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '5px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                                             Tịch thu hải quan
                                         </span>
                                         
@@ -112,29 +118,27 @@ const HomePage = () => {
                                             onClick={() => item.id && toggleLike(item.id)}
                                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? "#ff4757" : "none"} stroke={isLiked ? "#ff4757" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.2s ease' }}>
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill={isLiked ? "#ff4757" : "none"} stroke={isLiked ? "#ff4757" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.2s ease' }}>
                                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                             </svg>
                                         </button>
                                     </div>
 
-                                    <h3 style={{ fontSize: '17px', margin: '0 0 12px 0', color: '#222', flex: 1, lineHeight: '1.4' }}>{name}</h3>
+                                    <h3 style={{ fontSize: '16px', margin: '0 0 10px 0', color: '#2b2b2b', flex: 1, lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                        {name}
+                                    </h3>
                                     
-                                    <div style={{ marginBottom: '12px' }}>
-                                        <span style={{ color: '#b71c1c', fontSize: '20px', fontWeight: '900' }}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <span style={{ color: '#d32f2f', fontSize: '20px', fontWeight: '900' }}>
                                             {price.toLocaleString()} VNĐ
                                         </span>
-                                    </div>
-
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', fontSize: '14px', color: '#555' }}>
-                                        <span>🔨 Lượt đấu giá: <strong style={{ color: '#222' }}>{item.bidCount || mockBids}</strong></span>
                                     </div>
 
                                     {item.end_time && <CountdownTimer endTime={item.end_time} />}
 
                                     <button 
                                         onClick={() => item.id && navigate(`/product/${item.id}`)}
-                                        style={{ width: '100%', padding: '12px', backgroundColor: '#b71c1c', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '18px', transition: 'background-color 0.2s' }}
+                                        style={{ width: '100%', padding: '12px', backgroundColor: '#d32f2f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', marginTop: '16px', transition: 'background-color 0.2s', textTransform: 'uppercase' }}
                                     >
                                         Tham gia đấu giá
                                     </button>
