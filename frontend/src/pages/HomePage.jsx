@@ -13,9 +13,17 @@ const HomePage = () => {
         const fetchAssets = async () => {
             try {
                 const response = await api.get('/assets');
-                setAssets(response.data);
+                const actualData = response.data.data || response.data;
+                
+                if (Array.isArray(actualData)) {
+                    setAssets(actualData);
+                } else {
+                    console.error(actualData);
+                    setAssets([]); 
+                }
             } catch (error) {
                 console.error(error);
+                setAssets([]);
             }
         };
         fetchAssets();
