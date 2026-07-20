@@ -1,4 +1,4 @@
-/* 1. Tiêu diệt thanh Banner trên cùng của Google */
+
 .VIpgJd-ZVi9od-ORHb-OEVmcd,
 .goog-te-banner-frame.skiptranslate,
 .goog-te-gadget-simple {
@@ -7,8 +7,6 @@
 body {
     top: 0px !important; 
 }
-
-/* 2. TUYỆT CHIÊU: Giữ cho Google vẫn hoạt động nhưng bay ra ngoài màn hình */
 #google_translate_element {
     position: absolute !important;
     top: -9999px !important;

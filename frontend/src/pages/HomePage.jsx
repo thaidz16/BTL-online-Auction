@@ -92,11 +92,14 @@ const HomePage = () => {
                     {assets.map((item) => {
                         const isLiked = likedItems.includes(item.id);
                         const mockBids = Math.floor(Math.random() * 50) + 10;
+                        const price = item.starting_price || 0;
+                        const imageUrl = item.image_url || 'https://via.placeholder.com/300';
+                        const name = item.name || 'Tài sản đang cập nhật';
 
                         return (
-                            <div key={item.id} style={{ backgroundColor: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 3px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s' }}>
+                            <div key={item.id || Math.random()} style={{ backgroundColor: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 3px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s' }}>
                                 <div style={{ position: 'relative' }}>
-                                    <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+                                    <img src={imageUrl} alt={name} style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
                                 </div>
                                 
                                 <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -106,7 +109,7 @@ const HomePage = () => {
                                         </span>
                                         
                                         <button 
-                                            onClick={() => toggleLike(item.id)}
+                                            onClick={() => item.id && toggleLike(item.id)}
                                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? "#ff4757" : "none"} stroke={isLiked ? "#ff4757" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.2s ease' }}>
@@ -115,11 +118,11 @@ const HomePage = () => {
                                         </button>
                                     </div>
 
-                                    <h3 style={{ fontSize: '17px', margin: '0 0 12px 0', color: '#222', flex: 1, lineHeight: '1.4' }}>{item.name}</h3>
+                                    <h3 style={{ fontSize: '17px', margin: '0 0 12px 0', color: '#222', flex: 1, lineHeight: '1.4' }}>{name}</h3>
                                     
                                     <div style={{ marginBottom: '12px' }}>
                                         <span style={{ color: '#b71c1c', fontSize: '20px', fontWeight: '900' }}>
-                                            {item.starting_price.toLocaleString()} VNĐ
+                                            {price.toLocaleString()} VNĐ
                                         </span>
                                     </div>
 
@@ -127,10 +130,10 @@ const HomePage = () => {
                                         <span>🔨 Lượt đấu giá: <strong style={{ color: '#222' }}>{item.bidCount || mockBids}</strong></span>
                                     </div>
 
-                                    <CountdownTimer endTime={item.end_time} />
+                                    {item.end_time && <CountdownTimer endTime={item.end_time} />}
 
                                     <button 
-                                        onClick={() => navigate(`/product/${item.id}`)}
+                                        onClick={() => item.id && navigate(`/product/${item.id}`)}
                                         style={{ width: '100%', padding: '12px', backgroundColor: '#b71c1c', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '18px', transition: 'background-color 0.2s' }}
                                     >
                                         Tham gia đấu giá
