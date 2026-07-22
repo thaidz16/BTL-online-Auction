@@ -10,8 +10,7 @@ const AdminPage = () => {
     useEffect(() => {
         fetchData();
 
-        // Khởi tạo WebSocket
-        ws.current = new WebSocket('ws://localhost:8080/ws/admin');
+        ws.current = new WebSocket('wss://btl-online-auction.onrender.com/ws/admin');
 
         ws.current.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -32,13 +31,10 @@ const AdminPage = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const headers = { Authorization: `Bearer ${token}` };
-            
-            const resDeposits = await api.get('/user/admin/pending-deposits', { headers });
+            const resDeposits = await api.get('/user/admin/pending-deposits');
             setDeposits(resDeposits.data.data);
 
-            const resAssets = await api.get('/assets/pending', { headers });
+            const resAssets = await api.get('/assets/pending');
             setAssets(resAssets.data.data);
         } catch (error) {
             console.error(error);
@@ -52,13 +48,8 @@ const AdminPage = () => {
 
     const handleApproveDeposit = async (id, userId, amount) => {
         try {
-            const token = localStorage.getItem('token');
-            await api.post('/user/admin/approve-deposit', 
-                { deposit_id: id, user_id: userId, amount }, 
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.post('/user/admin/approve-deposit', { deposit_id: id, user_id: userId, amount });
             alert('Đã duyệt tiền thành công!');
-            // Cập nhật State trực tiếp 
             setDeposits(prev => prev.filter(d => d.id !== id)); 
         } catch (error) {
             alert('Lỗi duyệt tiền');
@@ -67,13 +58,8 @@ const AdminPage = () => {
 
     const handleApproveAsset = async (id) => {
         try {
-            const token = localStorage.getItem('token');
-            await api.put(`/assets/${id}/status`, 
-                { status: 'APPROVED' }, 
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.put(`/assets/${id}/status`, { status: 'APPROVED' });
             alert('Đã duyệt sản phẩm lên sàn!');
-            // Cập nhật State trực tiếp 
             setAssets(prev => prev.filter(a => a.id !== id));
         } catch (error) {
             alert('Lỗi duyệt sản phẩm');
@@ -83,7 +69,6 @@ const AdminPage = () => {
     return (
         <div style={{ backgroundColor: '#f5f5f5', minHeight: '90vh', padding: '40px 20px', position: 'relative' }}>
             
-            {/* Popup Thông báo Real-time */}
             {notification && (
                 <div style={{
                     position: 'fixed', top: '20px', right: '20px', backgroundColor: '#4caf50',
@@ -98,7 +83,6 @@ const AdminPage = () => {
             
             <div style={{ display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap' }}>
                 
-                {/* Cột Nạp Tiền */}
                 <div style={{ flex: 1, minWidth: '300px', backgroundColor: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ borderBottom: '2px solid #2e7d32', paddingBottom: '10px', color: '#2e7d32' }}>💰 YÊU CẦU NẠP TIỀN</h3>
                     {deposits.length === 0 ? <p>Không có yêu cầu nạp tiền nào.</p> : deposits.map(d => (
@@ -114,7 +98,6 @@ const AdminPage = () => {
                     ))}
                 </div>
 
-                {/* Cột Duyệt Tài Sản */}
                 <div style={{ flex: 1, minWidth: '300px', backgroundColor: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ borderBottom: '2px solid #f57c00', paddingBottom: '10px', color: '#f57c00' }}>📦 TÀI SẢN CHỜ LÊN SÀN</h3>
                     {assets.length === 0 ? <p>Không có tài sản chờ duyệt.</p> : assets.map(a => (
