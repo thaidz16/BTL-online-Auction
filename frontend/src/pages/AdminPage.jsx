@@ -1,12 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
 
 const AdminPage = () => {
     const [deposits, setDeposits] = useState([]);
     const [assets, setAssets] = useState([]);
+    const [notification, setNotification] = useState(null);
+    const ws = useRef(null);
 
     useEffect(() => {
         fetchData();
+
+        // Khởi tạo WebSocket
+        ws.current = new WebSocket('ws://localhost:8080/ws/admin');
+
+        ws.current.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'NEW_DEPOSIT') {
+                setDeposits(prev => [data.payload, ...prev]);
+                showNotification(`💰 Có yêu cầu nạp tiền mới từ ${data.payload.user_email}!`);
+            } else if (data.type === 'NEW_ASSET') {
+                setAssets(prev => [data.payload, ...prev]);
+                showNotification(`📦 Có tài sản mới chờ duyệt: ${data.payload.name}!`);
+            }
+        };
+
+        return () => {
+            if (ws.current) ws.current.close();
+        };
     }, []);
 
     const fetchData = async () => {
@@ -24,6 +45,11 @@ const AdminPage = () => {
         }
     };
 
+    const showNotification = (msg) => {
+        setNotification(msg);
+        setTimeout(() => setNotification(null), 5000);
+    };
+
     const handleApproveDeposit = async (id, userId, amount) => {
         try {
             const token = localStorage.getItem('token');
@@ -32,7 +58,8 @@ const AdminPage = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             alert('Đã duyệt tiền thành công!');
-            fetchData();
+            // Cập nhật State trực tiếp 
+            setDeposits(prev => prev.filter(d => d.id !== id)); 
         } catch (error) {
             alert('Lỗi duyệt tiền');
         }
@@ -46,18 +73,32 @@ const AdminPage = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             alert('Đã duyệt sản phẩm lên sàn!');
-            fetchData();
+            // Cập nhật State trực tiếp 
+            setAssets(prev => prev.filter(a => a.id !== id));
         } catch (error) {
             alert('Lỗi duyệt sản phẩm');
         }
     };
 
     return (
-        <div style={{ backgroundColor: '#f5f5f5', minHeight: '90vh', padding: '40px 20px' }}>
+        <div style={{ backgroundColor: '#f5f5f5', minHeight: '90vh', padding: '40px 20px', position: 'relative' }}>
+            
+            {/* Popup Thông báo Real-time */}
+            {notification && (
+                <div style={{
+                    position: 'fixed', top: '20px', right: '20px', backgroundColor: '#4caf50',
+                    color: 'white', padding: '15px 20px', borderRadius: '8px', 
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)', fontWeight: 'bold', zIndex: 9999
+                }}>
+                    {notification}
+                </div>
+            )}
+
             <h1 style={{ textAlign: 'center', color: '#b71c1c', marginBottom: '40px' }}>TRUNG TÂM QUẢN TRỊ HỆ THỐNG</h1>
             
             <div style={{ display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap' }}>
                 
+                {/* Cột Nạp Tiền */}
                 <div style={{ flex: 1, minWidth: '300px', backgroundColor: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ borderBottom: '2px solid #2e7d32', paddingBottom: '10px', color: '#2e7d32' }}>💰 YÊU CẦU NẠP TIỀN</h3>
                     {deposits.length === 0 ? <p>Không có yêu cầu nạp tiền nào.</p> : deposits.map(d => (
@@ -73,6 +114,7 @@ const AdminPage = () => {
                     ))}
                 </div>
 
+                {/* Cột Duyệt Tài Sản */}
                 <div style={{ flex: 1, minWidth: '300px', backgroundColor: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ borderBottom: '2px solid #f57c00', paddingBottom: '10px', color: '#f57c00' }}>📦 TÀI SẢN CHỜ LÊN SÀN</h3>
                     {assets.length === 0 ? <p>Không có tài sản chờ duyệt.</p> : assets.map(a => (
