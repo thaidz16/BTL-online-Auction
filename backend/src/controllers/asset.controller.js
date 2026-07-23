@@ -4,15 +4,34 @@ const AssetController = {
     createAsset: async (req, res) => {
         try {
             const seller_id = req.user.id;
-            const { category_id, name, description, image, condition_tag } = req.body;
+            const { category_id, name, description, image, condition_tag, specifications } = req.body;
             
             if (!name || !description || !image) {
                 return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc!' });
             }
 
+            // Người bán tự nhập thông số kỹ thuật (key-value) khi đăng bán.
+            // Không còn lấy dữ liệu mẫu (mock) cứng nữa - nếu không nhập gì thì lưu NULL.
+            let specsToSave = null;
+            if (specifications) {
+                if (typeof specifications === 'string') {
+                    // Đã là chuỗi JSON gửi từ frontend -> validate lại cho chắc rồi lưu nguyên chuỗi
+                    try {
+                        const parsed = JSON.parse(specifications);
+                        if (parsed && Object.keys(parsed).length > 0) {
+                            specsToSave = JSON.stringify(parsed);
+                        }
+                    } catch (e) {
+                        specsToSave = null;
+                    }
+                } else if (typeof specifications === 'object' && Object.keys(specifications).length > 0) {
+                    specsToSave = JSON.stringify(specifications);
+                }
+            }
+
             const [result] = await db.execute(
-                "INSERT INTO assets (seller_id, category_id, name, description, image, condition_tag, status) VALUES (?, ?, ?, ?, ?, ?, 'PENDING')",
-                [seller_id, category_id || 1, name, description, image, condition_tag || 'Mới 100%']
+                "INSERT INTO assets (seller_id, category_id, name, description, image, condition_tag, specifications, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')",
+                [seller_id, category_id || 1, name, description, image, condition_tag || 'Mới 100%', specsToSave]
             );
 
             res.status(201).json({ success: true, message: 'Đăng tài sản thành công, đang chờ duyệt!', asset_id: result.insertId });

@@ -1,11 +1,20 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import AccountMenu from './AccountMenu';
 
 const Navbar = () => {
     const isLoggedIn = !!localStorage.getItem('token');
     const role = localStorage.getItem('role') || ''; 
 
     const [currentLang, setCurrentLang] = useState('vi');
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        const term = searchTerm.trim();
+        navigate(term ? `/?q=${encodeURIComponent(term)}` : '/');
+    };
 
     useEffect(() => {
         if (document.cookie.includes('googtrans=/vi/en')) {
@@ -73,28 +82,46 @@ const Navbar = () => {
                 </span>
             </div>
 
+            {/* THANH TÌM KIẾM Ở GIỮA NAVBAR */}
+            <form onSubmit={handleSearchSubmit} style={{ flex: '1', maxWidth: '420px', margin: '0 20px', display: 'flex' }}>
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Tìm kiếm sản phẩm đấu giá..."
+                    style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        border: 'none',
+                        borderRadius: '20px 0 0 20px',
+                        outline: 'none',
+                        fontSize: '14px'
+                    }}
+                />
+                <button
+                    type="submit"
+                    style={{
+                        padding: '10px 18px',
+                        border: 'none',
+                        borderRadius: '0 20px 20px 0',
+                        backgroundColor: '#8e0000',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    🔍
+                </button>
+            </form>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ fontWeight: 'bold', fontSize: '18px', backgroundColor: 'white', color: '#b71c1c', padding: '5px 15px', borderRadius: '20px', marginRight: '10px' }}>
                     📞 0961.590.214
                 </span>
-                
-                {isLoggedIn && (
-                    <>
-                        <Link to="/history" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Lịch sử</Link>
-                        <Link to="/wallet" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Ví tiền</Link>
-                        <Link to="/wishlist" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>♥ Yêu thích</Link>
-                        <Link to="/sell" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', border: '1px dashed white', padding: '4px 10px', borderRadius: '6px' }}>
-                            + Đăng bán
-                        </Link>
-                    </>
-                )}
 
-                {role.toLowerCase() === 'admin' && (
-                    <Link to="/admin" style={{ color: 'white', backgroundColor: '#333', padding: '6px 15px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', marginLeft: '10px' }}>
-                        ⚙️ Quản trị
-                    </Link>
-                )}
-                
+                {/* GỘP Lịch sử / Ví tiền / Yêu thích / Đăng bán / Quản trị vào 1 menu tài khoản */}
+                {isLoggedIn && <AccountMenu role={role} />}
+
                 <select 
                     value={currentLang}
                     onChange={handleLanguageChange}

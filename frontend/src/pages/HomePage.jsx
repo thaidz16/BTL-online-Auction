@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import CountdownTimer from '../components/CountdownTimer';
 import HeroBanner from '../components/HeroBanner';
 
@@ -22,6 +22,14 @@ const HomePage = () => {
     const [likedItems, setLikedItems] = useState([]);
     const navigate = useNavigate();
     const isLoggedIn = !!localStorage.getItem('token');
+
+    // Từ khoá tìm kiếm đến từ thanh search trên Navbar (?q=...)
+    const [searchParams] = useSearchParams();
+    const searchQuery = (searchParams.get('q') || '').trim().toLowerCase();
+
+    const visibleAssets = Array.isArray(assets)
+        ? assets.filter(asset => !searchQuery || (asset.name || '').toLowerCase().includes(searchQuery))
+        : [];
 
     const toggleLike = async (e, id) => {
         e.stopPropagation();
@@ -144,15 +152,21 @@ const HomePage = () => {
                 </div>
 
                 <h1 style={{ color: '#333', borderBottom: '3px solid #b71c1c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>
-                    TÀI SẢN ĐANG ĐẤU GIÁ
+                    {searchQuery ? `KẾT QUẢ TÌM KIẾM: "${searchQuery}"` : 'TÀI SẢN ĐANG ĐẤU GIÁ'}
                 </h1>
+
+                {searchQuery && visibleAssets.length === 0 && (
+                    <p style={{ color: '#777', marginBottom: '30px' }}>
+                        Không tìm thấy sản phẩm nào phù hợp với từ khoá "{searchQuery}".
+                    </p>
+                )}
 
                 <div style={{ 
                     display: 'grid', 
                     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
                     gap: '25px' 
                 }}>
-                    {Array.isArray(assets) && assets.map(asset => {
+                    {visibleAssets.map(asset => {
                         const isLiked = likedItems.includes(asset.id);
                         const mockBids = asset.bidCount || Math.floor(Math.random() * 50) + 10;
 

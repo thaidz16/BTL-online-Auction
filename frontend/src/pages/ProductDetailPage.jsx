@@ -46,17 +46,10 @@ const ProductDetailPage = () => {
 
     // HÀM CHUYỂN ĐỔI CHUỖI JSON SANG OBJECT AN TOÀN (ANTI-CRASH)
     const getSpecs = () => {
+        // Không còn dữ liệu mẫu (mock) cứng nữa: nếu người bán không nhập thông số
+        // thì đơn giản là không có gì để hiển thị (khớp với AssetDetailPage.jsx).
         if (!asset.specifications) {
-            // MOCK DATA ĐỂ EM DEMO TRƯỚC NẾU DATABASE CHƯA CÓ DỮ LIỆU THẬT
-            return {
-                "Bộ vi xử lý": "Intel Core i7 12700H (Up to 4.7GHz)",
-                "Bộ nhớ RAM": "16GB DDR5 4800MHz (Hỗ trợ nâng cấp tối đa 64GB)",
-                "Card đồ họa": "NVIDIA GeForce RTX 4060 8GB GDDR6",
-                "Ổ lưu trữ": "512GB SSD M.2 PCIe Gen 4",
-                "Màn hình": "15.6 inch FHD IPS, 144Hz, 100% sRGB",
-                "Hệ điều hành": "Windows 11 Home bản quyền",
-                "Trọng lượng": "2.2 kg"
-            };
+            return null;
         }
         try {
             // Nếu database lưu dạng JSON Object rồi thì trả về luôn, nếu là string thì parse ra
