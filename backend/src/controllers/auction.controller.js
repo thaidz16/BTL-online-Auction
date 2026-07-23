@@ -16,12 +16,12 @@ const AuctionController = {
     },
 
     placeBid: async (req, res) => {
-        let { session_id, bid_amount } = req.body;
+        const { session_id, bid_amount } = req.body;
         const userId = req.user.id;
         
-        bid_amount = Number(bid_amount);
+        const amountToBid = parseFloat(bid_amount);
 
-        if (!bid_amount || bid_amount <= 0) {
+        if (!amountToBid || amountToBid <= 0) {
             return res.status(400).json({ success: false, message: 'Giá đặt không hợp lệ!' });
         }
 
@@ -39,9 +39,9 @@ const AuctionController = {
                 throw new Error('Phiên không tồn tại hoặc đã kết thúc!');
             }
 
-            const currentPrice = Number(session[0].current_price);
+            const currentPrice = parseFloat(session[0].current_price);
 
-            if (bid_amount <= currentPrice) {
+            if (amountToBid <= currentPrice) {
                 throw new Error('Giá đặt phải lớn hơn giá hiện tại!');
             }
 
@@ -50,9 +50,9 @@ const AuctionController = {
                 [userId]
             );
             
-            const currentBalance = Number(user[0].balance);
+            const currentBalance = parseFloat(user[0].balance || 0);
 
-            if (currentBalance < bid_amount) {
+            if (currentBalance < amountToBid) {
                 throw new Error('Số dư không đủ!');
             }
 
@@ -63,7 +63,7 @@ const AuctionController = {
 
             if (previousBid.length > 0) {
                 const prevUserId = previousBid[0].user_id;
-                const prevAmount = Number(previousBid[0].amount);
+                const prevAmount = parseFloat(previousBid[0].amount);
 
                 await connection.execute(
                     'UPDATE users SET balance = balance + ? WHERE id = ?', 
@@ -73,23 +73,26 @@ const AuctionController = {
 
             await connection.execute(
                 'UPDATE users SET balance = balance - ? WHERE id = ?', 
-                [bid_amount, userId]
+                [amountToBid, userId]
             );
             
             await connection.execute(
                 'INSERT INTO bids (session_id, user_id, amount) VALUES (?, ?, ?)', 
-                [session_id, userId, bid_amount]
+                [session_id, userId, amountToBid]
             );
             
             await connection.execute(
                 'UPDATE auction_sessions SET current_price = ? WHERE id = ?', 
-                [bid_amount, session_id]
+                [amountToBid, session_id]
             );
 
             await connection.commit();
             
-            req.io.emit('new_bid_update', { amount: bid_amount });
-            
+            req.io.emit('new_bid_update', { 
+                session_id: session_id,
+                amount: amountToBid 
+            });
+
             res.status(200).json({ success: true, message: 'Đấu giá thành công!' });
         } catch (error) {
             await connection.rollback();
