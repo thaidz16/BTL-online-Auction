@@ -31,7 +31,7 @@ const AdminPage = () => {
 
     const fetchData = async () => {
         try {
-            const resDeposits = await api.get('/user/admin/pending-deposits');
+            const resDeposits = await api.get('/users/admin/pending-deposits');
             setDeposits(resDeposits.data.data);
 
             const resAssets = await api.get('/assets/pending');
