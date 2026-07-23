@@ -5,7 +5,7 @@ const HistoryPage = () => {
     const [history, setHistory] = useState([]);
 
     useEffect(() => {
-        api.get('/user/bid-history')
+        api.get('/users/bid-history')
             .then(res => setHistory(res.data.data || []))
             .catch(err => console.log('Lỗi lấy lịch sử:', err));
     }, []);

@@ -1,7 +1,6 @@
 const db = require('../config/db');
 
 const UserController = {
-    // Lấy thông tin cá nhân + số dư ví
     getProfile: async (req, res) => {
         try {
             const [rows] = await db.execute(
@@ -11,17 +10,18 @@ const UserController = {
             if (rows.length === 0) return res.status(404).json({ success: false, message: 'User không tồn tại!' });
             res.status(200).json({ success: true, data: rows[0] });
         } catch (error) {
+            console.error("🚨 [Lỗi getProfile]:", error); // Ghi log lỗi chi tiết ra Terminal
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
 
-    // User gửi yêu cầu nạp tiền
     requestDeposit: async (req, res) => {
         const { amount } = req.body;
         try {
             await db.execute('INSERT INTO deposits (user_id, amount, status) VALUES (?, ?, "PENDING")', [req.user.id, amount]);
             res.status(201).json({ success: true, message: 'Yêu cầu nạp tiền đã gửi!' });
         } catch (error) {
+            console.error("🚨 [Lỗi requestDeposit]:", error); 
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
@@ -37,11 +37,11 @@ const UserController = {
             `);
             res.status(200).json({ success: true, data: rows });
         } catch (error) {
+            console.error("🚨 [Lỗi getPendingDeposits - TRUY VẤN SQL CÓ VẤN ĐỀ]:", error); // Thủ phạm sẽ hiện hình ở đây!
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
 
-    // Admin duyệt nạp tiền
     approveDeposit: async (req, res) => {
         const { deposit_id, user_id, amount } = req.body;
         const connection = await db.getConnection();
@@ -53,6 +53,7 @@ const UserController = {
             res.status(200).json({ success: true, message: 'Duyệt tiền thành công!' });
         } catch (error) {
             await connection.rollback();
+            console.error("🚨 [Lỗi approveDeposit - TRANSACTION THẤT BẠI]:", error);
             res.status(500).json({ success: false, message: 'Lỗi duyệt tiền!' });
         } finally {
             connection.release();
