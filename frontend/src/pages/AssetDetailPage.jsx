@@ -9,27 +9,23 @@ const AssetDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     
-    // States quản lý dữ liệu
     const [asset, setAsset] = useState(null);
     const [currentPrice, setCurrentPrice] = useState(0);
     const [bidAmount, setBidAmount] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // Lịch sử đấu giá Live
     const [bidHistory, setBidHistory] = useState([
         { user: 'Hệ thống', amount: '---', time: 'Phòng đấu giá đã mở' }
     ]);
 
     const historyEndRef = useRef(null);
 
-    // Tự động cuộn xuống dòng mới nhất trong lịch sử
     useEffect(() => {
         historyEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [bidHistory]);
 
-    // KÉO DỮ LIỆU TÀI SẢN LÚC MỚI VÀO PHÒNG
     useEffect(() => {
-        window.scrollTo(0, 0); // Ép cuộn lên đầu
+        window.scrollTo(0, 0); 
 
         const fetchAsset = async () => {
             try {
@@ -37,69 +33,67 @@ const AssetDetailPage = () => {
                 const data = res.data.data || res.data;
                 setAsset(data);
                 setCurrentPrice(Number(data.current_price || 0));
-                setBidAmount(Number(data.current_price || 0) + 50000); // Gợi ý giá tiếp theo (+50k)
+                setBidAmount(Number(data.current_price || 0) + 50000); 
             } catch (error) {
-                console.error("Lỗi:", error);
+                console.error(error);
             }
         };
         fetchAsset();
     }, [id]);
 
-    // KÍCH HOẠT SIÊU NĂNG LỰC REAL-TIME (SOCKET.IO)
     useEffect(() => {
         socket.on('new_bid_update', (data) => {
             if (data.session_id == id) {
                 const newPrice = Number(data.amount);
                 setCurrentPrice(newPrice);
                 
-                // Thêm vào lịch sử live
                 setBidHistory(prev => [...prev, { 
                     user: 'Người chơi ẩn danh', 
                     amount: newPrice, 
                     time: new Date().toLocaleTimeString('vi-VN') 
                 }]);
                 
-                // Cập nhật gợi ý giá ở ô Input
                 setBidAmount(newPrice + 50000);
                 
                 toast.info(`🔥 Có người vừa đặt giá: ${newPrice.toLocaleString('vi-VN')} VNĐ!`);
             }
         });
 
-        return () => socket.off('new_bid_update'); // Dọn dẹp socket khi thoát phòng
+        return () => socket.off('new_bid_update'); 
     }, [id]);
 
-    // Hàm xử lý nút "Ra giá nhanh"
     const handleQuickBid = (amountToAdd) => {
         setBidAmount(currentPrice + amountToAdd);
     };
 
-    // HÀM CHỐT GIÁ BẮN LÊN SERVER
     const handleBidSubmit = async () => {
         if (!bidAmount || isNaN(bidAmount) || bidAmount <= currentPrice) {
             toast.error("Giá đưa ra phải lớn hơn giá hiện tại!");
             return;
         }
 
-        setIsSubmitting(true); // Khóa nút chống spam click
+        setIsSubmitting(true); 
 
-        // Bắn tín hiệu đặt giá qua Socket
-        socket.emit('place_bid', { session_id: id, amount: bidAmount });
-        
-        // Tự update lịch sử của chính mình lên giao diện cho nhanh
-        setBidHistory(prev => [...prev, { 
-            user: 'Bạn (Vừa ra giá)', 
-            amount: bidAmount, 
-            time: new Date().toLocaleTimeString('vi-VN') 
-        }]);
+        try {
+            await api.post('/auctions/bid', {
+                session_id: id,
+                bid_amount: Number(bidAmount)
+            });
+            
+            setBidHistory(prev => [...prev, { 
+                user: 'Bạn (Vừa ra giá)', 
+                amount: Number(bidAmount), 
+                time: new Date().toLocaleTimeString('vi-VN') 
+            }]);
 
-        // Mở khóa nút sau 1 giây
-        setTimeout(() => {
+        } catch (error) {
+            const errorMsg = error.response?.data?.message || 'Lỗi hệ thống!';
+            toast.error(errorMsg);
+        } finally {
             setIsSubmitting(false);
-        }, 1000);
+        }
     };
 
-    // HÀM DỊCH JSON THÔNG SỐ KỸ THUẬT (An toàn chống crash)
     const getSpecs = () => {
         if (!asset || !asset.specifications) return null;
         try {
@@ -107,7 +101,6 @@ const AssetDetailPage = () => {
                 ? JSON.parse(asset.specifications) 
                 : asset.specifications;
         } catch (e) {
-            console.error("Lỗi parse JSON thông số kỹ thuật:", e);
             return null;
         }
     };
@@ -125,7 +118,6 @@ const AssetDetailPage = () => {
     return (
         <div style={{ backgroundColor: '#121212', minHeight: '100vh', padding: '20px', color: '#fff', fontFamily: 'monospace, sans-serif' }}>
             
-            {/* THANH HEADER PHÒNG */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1e1e1e', padding: '15px 30px', borderRadius: '12px', marginBottom: '20px', borderBottom: '3px solid #b71c1c' }}>
                 <h2 style={{ margin: 0, color: '#f5f5f5' }}>🔴 PHÒNG ĐẤU GIÁ LIVE: <span style={{color: '#ff5252'}}>{asset.name}</span></h2>
                 <button onClick={() => navigate(-1)} style={{ padding: '10px 20px', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
@@ -135,13 +127,12 @@ const AssetDetailPage = () => {
 
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                 
-                {/* BẢNG BÊN TRÁI: THÔNG TIN TÀI SẢN */}
                 <div style={{ flex: '1', minWidth: '350px', backgroundColor: '#1e1e1e', borderRadius: '12px', padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <img 
                         src={asset.image} 
                         alt={asset.name} 
                         style={{ width: '100%', maxWidth: '350px', borderRadius: '8px', border: '2px solid #333', marginBottom: '20px', objectFit: 'cover' }} 
-                        onError={(e) => { e.target.src = 'https://placehold.co/600x400/ececec/999999?text=Phenikaa+Auction' }}
+                        onError={(e) => { e.target.src = '[https://placehold.co/600x400/ececec/999999?text=Phenikaa+Auction](https://placehold.co/600x400/ececec/999999?text=Phenikaa+Auction)' }}
                     />
                     
                     <div style={{ width: '100%', backgroundColor: '#2a2a2a', padding: '20px', borderRadius: '8px', textAlign: 'center', marginBottom: '20px', border: '1px solid #444' }}>
@@ -154,19 +145,16 @@ const AssetDetailPage = () => {
                     <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#3e2723', padding: '15px 20px', borderRadius: '8px', border: '1px solid #5d4037' }}>
                         <span style={{ color: '#ffb300', fontWeight: 'bold' }}>⏳ Thời gian còn lại:</span>
                         <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#ffcc80' }}>
-                            <CountdownTimer endTime={asset.end_time} />
+                            <CountdownTimer endTime="{asset.end_time}"/>
                         </div>
                     </div>
                 </div>
 
-                {/* BẢNG BÊN PHẢI: BÀN ĐIỀU KHIỂN & LỊCH SỬ LIVE */}
                 <div style={{ flex: '1.5', minWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     
-                    {/* KHU VỰC RA GIÁ */}
                     <div style={{ backgroundColor: '#1e1e1e', padding: '25px', borderRadius: '12px', border: '1px solid #333' }}>
                         <h3 style={{ marginTop: 0, color: '#f5f5f5', borderBottom: '1px solid #333', paddingBottom: '10px' }}>BÀN ĐIỀU KHIỂN RA GIÁ</h3>
                         
-                        {/* Nút ra giá nhanh */}
                         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
                             {[50000, 100000, 500000, 1000000].map(amount => (
                                 <button 
@@ -181,7 +169,6 @@ const AssetDetailPage = () => {
                             ))}
                         </div>
 
-                        {/* Ô nhập giá và Nút Submit */}
                         <div style={{ display: 'flex', gap: '15px' }}>
                             <input 
                                 type="number" 
@@ -199,7 +186,6 @@ const AssetDetailPage = () => {
                         </div>
                     </div>
 
-                    {/* KHU VỰC LỊCH SỬ LIVE */}
                     <div style={{ backgroundColor: '#1e1e1e', padding: '25px', borderRadius: '12px', flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #333' }}>
                         <h3 style={{ marginTop: 0, color: '#f5f5f5', borderBottom: '1px solid #333', paddingBottom: '10px' }}>LỊCH SỬ ĐẤU GIÁ (LIVE)</h3>
                         
@@ -211,17 +197,15 @@ const AssetDetailPage = () => {
                                     <span style={{ fontSize: '12px', color: '#777' }}>{bid.time}</span>
                                 </div>
                             ))}
-                            <div ref={historyEndRef} /> {/* Neo cuộn */}
+                            <div ref={historyEndRef} /> 
                         </div>
                     </div>
 
                 </div>
             </div>
 
-            {/* BƯỚC CẢI TIẾN: PHẦN DƯỚI - MÔ TẢ & THÔNG SỐ KỸ THUẬT DARK MODE */}
             <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px dashed #333', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
                 
-                {/* MÔ TẢ TÀI SẢN */}
                 <div style={{ flex: '1.5', minWidth: '350px' }}>
                     <h3 style={{ color: '#f5f5f5', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
                         📖 Chi tiết sản phẩm
@@ -231,7 +215,6 @@ const AssetDetailPage = () => {
                     </div>
                 </div>
 
-                {/* BẢNG THÔNG SỐ KỸ THUẬT ĐỘNG */}
                 {specs && (
                     <div style={{ flex: '1', minWidth: '300px' }}>
                         <h3 style={{ color: '#f5f5f5', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
