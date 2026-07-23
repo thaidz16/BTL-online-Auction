@@ -82,6 +82,7 @@ const Navbar = () => {
                     <>
                         <Link to="/history" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Lịch sử</Link>
                         <Link to="/wallet" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>Ví tiền</Link>
+                        <Link to="/wishlist" style={{ color: 'white', textDecoration: 'none', fontWeight: '500' }}>♥ Yêu thích</Link>
                         <Link to="/sell" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', border: '1px dashed white', padding: '4px 10px', borderRadius: '6px' }}>
                             + Đăng bán
                         </Link>

@@ -94,6 +94,75 @@ const AuthController = {
             console.error("Lỗi Controller Đăng Nhập:", error);
             res.status(500).json({ success: false, message: 'Lỗi server nội bộ!' });
         }
+    },
+
+    forgotPassword: async (req, res) => {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ success: false, message: 'Vui lòng nhập email!' });
+            }
+
+            const user = await UserModel.findByEmail(email);
+            // Không tiết lộ email có tồn tại hay không, tránh lộ thông tin tài khoản
+            if (!user) {
+                return res.status(200).json({ success: true, message: 'Nếu email tồn tại, mã OTP đặt lại mật khẩu đã được gửi!' });
+            }
+
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            await db.execute(
+                'UPDATE users SET reset_otp = ?, reset_otp_expires = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE email = ?',
+                [otpCode, email]
+            );
+
+            const subject = 'Đặt lại mật khẩu PHENIKAA AUCTION';
+            const textContent = `Chào ${user.fullname},\n\nMã OTP để đặt lại mật khẩu của bạn là: ${otpCode}.\nMã có hiệu lực trong 10 phút.`;
+            await sendEmail(email, subject, textContent);
+
+            res.status(200).json({ success: true, message: 'Nếu email tồn tại, mã OTP đặt lại mật khẩu đã được gửi!' });
+        } catch (error) {
+            console.error("Lỗi Controller Quên Mật Khẩu:", error);
+            res.status(500).json({ success: false, message: 'Lỗi server nội bộ!' });
+        }
+    },
+
+    resetPassword: async (req, res) => {
+        try {
+            const { email, otp, newPassword } = req.body;
+            if (!email || !otp || !newPassword) {
+                return res.status(400).json({ success: false, message: 'Vui lòng nhập đủ thông tin!' });
+            }
+
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordRegex.test(newPassword)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Mật khẩu phải từ 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!'
+                });
+            }
+
+            const [users] = await db.execute(
+                'SELECT * FROM users WHERE email = ? AND reset_otp = ? AND reset_otp_expires > NOW()',
+                [email, otp]
+            );
+
+            if (users.length === 0) {
+                return res.status(400).json({ success: false, message: 'Mã OTP không đúng hoặc đã hết hạn!' });
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+            await db.execute(
+                'UPDATE users SET password = ?, reset_otp = NULL, reset_otp_expires = NULL WHERE email = ?',
+                [hashedPassword, email]
+            );
+
+            res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay.' });
+        } catch (error) {
+            console.error("Lỗi Controller Đặt Lại Mật Khẩu:", error);
+            res.status(500).json({ success: false, message: 'Lỗi server nội bộ!' });
+        }
     }
 };
 

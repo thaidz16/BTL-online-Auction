@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import PasswordInput from '../components/PasswordInput';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({ fullname: '', email: '', password: '' });
@@ -53,7 +54,9 @@ const RegisterPage = () => {
                         <h2 style={{ textAlign: 'center', color: '#b71c1c', marginBottom: '30px' }}>ĐĂNG KÝ TÀI KHOẢN</h2>
                         <input type="text" placeholder="Họ và tên" required style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setFormData({...formData, fullname: e.target.value})} />
                         <input type="email" placeholder="Email (dùng để nhận OTP)" required style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setFormData({...formData, email: e.target.value})} />
-                        <input type="password" placeholder="Mật khẩu" required style={{ width: '100%', padding: '12px', marginBottom: '25px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setFormData({...formData, password: e.target.value})} />
+                        <div style={{ marginBottom: '25px' }}>
+                            <PasswordInput placeholder="Mật khẩu" required style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setFormData({...formData, password: e.target.value})} />
+                        </div>
                         <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#b71c1c', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>TẠO TÀI KHOẢN</button>
                     </form>
                 ) : (

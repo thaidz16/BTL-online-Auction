@@ -57,12 +57,26 @@ const AdminPage = () => {
     };
 
     const handleApproveAsset = async (id) => {
+        const start_price = prompt('Giá khởi điểm (VNĐ):');
+        if (start_price === null) return; // Admin bấm Cancel
+
+        const step_price = prompt('Bước giá (VNĐ):');
+        if (step_price === null) return;
+
+        const duration_days = prompt('Thời gian đấu giá (số ngày):', '3');
+        if (duration_days === null) return;
+
         try {
-            await api.put(`/assets/${id}/status`, { status: 'APPROVED' });
+            await api.put(`/assets/${id}/status`, {
+                status: 'APPROVED',
+                start_price: Number(start_price),
+                step_price: Number(step_price),
+                duration_days: Number(duration_days) || 3
+            });
             alert('Đã duyệt sản phẩm lên sàn!');
             setAssets(prev => prev.filter(a => a.id !== id));
         } catch (error) {
-            alert('Lỗi duyệt sản phẩm');
+            alert(error.response?.data?.message || 'Lỗi duyệt sản phẩm');
         }
     };
 

@@ -21,13 +21,30 @@ const HomePage = () => {
     const [assets, setAssets] = useState([]);
     const [likedItems, setLikedItems] = useState([]);
     const navigate = useNavigate();
+    const isLoggedIn = !!localStorage.getItem('token');
 
-    const toggleLike = (e, id) => {
+    const toggleLike = async (e, id) => {
         e.stopPropagation();
-        if (likedItems.includes(id)) {
-            setLikedItems(likedItems.filter(itemId => itemId !== id));
-        } else {
-            setLikedItems([...likedItems, id]);
+        if (!isLoggedIn) {
+            alert('Vui lòng đăng nhập để lưu vào mục yêu thích!');
+            navigate('/login');
+            return;
+        }
+
+        const isLiked = likedItems.includes(id);
+        // Cập nhật giao diện ngay, rồi đồng bộ lên server
+        setLikedItems(prev => isLiked ? prev.filter(itemId => itemId !== id) : [...prev, id]);
+
+        try {
+            if (isLiked) {
+                await api.delete(`/wishlist/${id}`);
+            } else {
+                await api.post(`/wishlist/${id}`);
+            }
+        } catch (error) {
+            console.error("Lỗi cập nhật yêu thích:", error);
+            // Rollback nếu gọi API lỗi
+            setLikedItems(prev => isLiked ? [...prev, id] : prev.filter(itemId => itemId !== id));
         }
     };
 
@@ -41,6 +58,12 @@ const HomePage = () => {
             }
         };
         fetchData();
+
+        if (isLoggedIn) {
+            api.get('/wishlist/ids')
+                .then(res => setLikedItems(res.data.data || []))
+                .catch(err => console.error("Lỗi lấy danh sách yêu thích:", err));
+        }
     }, []);
 
     return (

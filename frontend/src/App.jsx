@@ -11,6 +11,8 @@ import HistoryPage from './pages/HistoryPage';
 import WalletPage from './pages/WalletPage';
 import SellPage from './pages/SellPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import WishlistPage from './pages/WishlistPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function App() {
   const isLoggedIn = !!localStorage.getItem('token');
@@ -28,6 +30,8 @@ function App() {
         <Route path="/sell" element={<SellPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Routes>
     </BrowserRouter>
   );

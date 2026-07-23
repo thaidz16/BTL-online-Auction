@@ -30,12 +30,14 @@ const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const assetRoutes = require('./routes/asset.routes');
 const auctionRoutes = require('./routes/auction.routes');
+const wishlistRoutes = require('./routes/wishlist.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/assets', assetRoutes);
 app.use('/api/auctions', auctionRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 app.get('/', (req, res) => {
   res.send('Server is running!');

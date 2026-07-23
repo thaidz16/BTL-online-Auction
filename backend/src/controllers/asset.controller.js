@@ -29,7 +29,7 @@ const AssetController = {
                        s.current_price, s.end_time 
                 FROM assets a
                 JOIN auction_sessions s ON a.id = s.asset_id
-                WHERE s.status = 'active'
+                WHERE s.status = 'ACTIVE'
                 ORDER BY s.end_time ASC
             `);
 
@@ -43,16 +43,35 @@ const AssetController = {
     approveAsset: async (req, res) => {
         try {
             const { id } = req.params;
-            const { status } = req.body; 
+            const { status, start_price, step_price, duration_days } = req.body;
 
             if (!['APPROVED', 'REJECTED'].includes(status)) {
                 return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ!' });
             }
 
+            // Khi duyệt lên sàn, bắt buộc phải có giá khởi điểm/bước giá để mở phiên đấu giá
+            if (status === 'APPROVED' && (!start_price || !step_price)) {
+                return res.status(400).json({ success: false, message: 'Cần nhập giá khởi điểm và bước giá để mở phiên đấu giá!' });
+            }
+
             const [result] = await db.execute('UPDATE assets SET status = ? WHERE id = ?', [status, id]);
-            
+
             if (result.affectedRows === 0) {
                 return res.status(404).json({ success: false, message: 'Không tìm thấy tài sản!' });
+            }
+
+            if (status === 'APPROVED') {
+                const days = Number(duration_days) > 0 ? Number(duration_days) : 3;
+                // Đây là bước còn thiếu ở bản cũ: phải tạo phiên đấu giá ACTIVE thì tài sản mới lên trang chủ
+                await db.execute(
+                    `INSERT INTO auction_sessions (asset_id, start_price, step_price, current_price, start_time, end_time, status)
+                     VALUES (?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'ACTIVE')
+                     ON DUPLICATE KEY UPDATE
+                        start_price = VALUES(start_price), step_price = VALUES(step_price),
+                        current_price = VALUES(current_price), start_time = VALUES(start_time),
+                        end_time = VALUES(end_time), status = 'ACTIVE'`,
+                    [id, start_price, step_price, start_price, days]
+                );
             }
 
             res.status(200).json({ success: true, message: `Đã cập nhật trạng thái thành ${status}` });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import PasswordInput from '../components/PasswordInput';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -30,7 +31,12 @@ const LoginPage = () => {
             <form onSubmit={handleLogin} style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
                 <h2 style={{ textAlign: 'center', color: '#b71c1c', marginBottom: '30px' }}>ĐĂNG NHẬP HỆ THỐNG</h2>
                 <input type="email" placeholder="Email" required style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setEmail(e.target.value)} />
-                <input type="password" placeholder="Mật khẩu" required style={{ width: '100%', padding: '12px', marginBottom: '25px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setPassword(e.target.value)} />
+                <div style={{ marginBottom: '10px' }}>
+                    <PasswordInput placeholder="Mật khẩu" required style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc' }} onChange={e => setPassword(e.target.value)} />
+                </div>
+                <div style={{ textAlign: 'right', marginBottom: '15px' }}>
+                    <Link to="/forgot-password" style={{ fontSize: '13px', color: '#b71c1c' }}>Quên mật khẩu?</Link>
+                </div>
                 <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#b71c1c', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>ĐĂNG NHẬP</button>
             </form>
         </div>
