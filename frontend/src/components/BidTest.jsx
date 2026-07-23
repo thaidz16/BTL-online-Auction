@@ -6,21 +6,28 @@ const BidTest = () => {
     const [amount, setAmount] = useState('');
 
     useEffect(() => {
-        // Lắng nghe xem có ai vừa đặt giá mới không
         socket.on('new_bid_update', (data) => {
-            setBids((prev) => [...prev, data]);
+            setBids((prev) => {
+                const updatedBids = [...prev, data];
+                
+                return updatedBids.sort((a, b) => Number(b.amount) - Number(a.amount));
+            });
         });
 
-        return () => socket.off('new_bid_update'); // Dọn dẹp khi tắt component
+        return () => socket.off('new_bid_update'); 
     }, []);
 
     const handlePlaceBid = () => {
-        // Gửi sự kiện 'place_bid' lên Server
+        if (!amount || Number(amount) <= 0) {
+            alert("Giá đặt phải lớn hơn 0 nhé!");
+            return;
+        }
         socket.emit('place_bid', { 
             session_id: 1, 
             user_id: 1, 
-            amount: amount 
+            amount: Number(amount) 
         });
+        
         setAmount('');
     };
 
@@ -35,10 +42,12 @@ const BidTest = () => {
             />
             <button onClick={handlePlaceBid}>Đặt giá ngay</button>
             
-            <h4>Lịch sử nhảy giá:</h4>
+            <h4>Lịch sử nhảy giá (Đã sắp xếp tự động):</h4>
             <ul>
                 {bids.map((bid, index) => (
-                    <li key={index}>User vừa đặt: {bid.amount} VNĐ</li>
+                    <li key={index} style={{ fontWeight: index === 0 ? 'bold' : 'normal', color: index === 0 ? 'green' : 'black' }}>
+                        User vừa đặt: {bid.amount.toLocaleString('vi-VN')} VNĐ
+                    </li>
                 ))}
             </ul>
         </div>

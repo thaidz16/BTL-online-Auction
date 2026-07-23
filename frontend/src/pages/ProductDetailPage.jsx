@@ -44,15 +44,11 @@ const ProductDetailPage = () => {
         );
     }
 
-    // HÀM CHUYỂN ĐỔI CHUỖI JSON SANG OBJECT AN TOÀN (ANTI-CRASH)
     const getSpecs = () => {
-        // Không còn dữ liệu mẫu (mock) cứng nữa: nếu người bán không nhập thông số
-        // thì đơn giản là không có gì để hiển thị (khớp với AssetDetailPage.jsx).
         if (!asset.specifications) {
             return null;
         }
         try {
-            // Nếu database lưu dạng JSON Object rồi thì trả về luôn, nếu là string thì parse ra
             return typeof asset.specifications === 'string' 
                 ? JSON.parse(asset.specifications) 
                 : asset.specifications;
@@ -72,7 +68,6 @@ const ProductDetailPage = () => {
                     ⬅ Quay lại
                 </button>
 
-                {/* KHU VỰC THÔNG TIN CHÍNH */}
                 <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
                     
                     <div style={{ flex: '1', minWidth: '350px' }}>
@@ -122,10 +117,8 @@ const ProductDetailPage = () => {
                     </div>
                 </div>
 
-                {/* PHẦN DƯỚI: MÔ TẢ & THÔNG SỐ KỸ THUẬT */}
                 <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px solid #eee', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
                     
-                    {/* MÔ TẢ TÀI SẢN (CHIẾM 60% CHIỀU RỘNG) */}
                     <div style={{ flex: '1.5', minWidth: '350px' }}>
                         <h3 style={{ color: '#333', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
                             Chi tiết sản phẩm
@@ -134,8 +127,6 @@ const ProductDetailPage = () => {
                             {asset.description || 'Chưa có mô tả chi tiết cho tài sản này.'}
                         </div>
                     </div>
-
-                    {/* BẢNG THÔNG SỐ KỸ THUẬT ĐỘNG (CHIẾM 40% CHIỀU RỘNG) */}
                     {specs && (
                         <div style={{ flex: '1', minWidth: '300px' }}>
                             <h3 style={{ color: '#333', fontSize: '22px', borderLeft: '4px solid #b71c1c', paddingLeft: '10px', marginBottom: '20px' }}>
