@@ -64,9 +64,10 @@ const AssetController = {
 
     getPendingAssets: async (req, res) => {
         try {
-            const [rows] = await db.execute('SELECT * FROM assets WHERE status = "PENDING" ORDER BY created_at DESC');
+            const [rows] = await db.execute(`SELECT * FROM assets WHERE status = 'PENDING' ORDER BY created_at DESC`);
             res.status(200).json({ success: true, data: rows });
         } catch (error) {
+            console.error("Lỗi API getPendingAssets:", error);
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
     },
