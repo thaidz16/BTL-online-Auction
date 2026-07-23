@@ -56,6 +56,46 @@ io.on('connection', (socket) => {
   });
 });
 
+// TỰ ĐỘNG ĐÓNG PHIÊN ĐẤU GIÁ ĐÃ HẾT GIỜ
+// Khi 1 phiên ACTIVE quá end_time: nếu có người đặt giá -> chuyển CLOSED + gán người thắng (winner_id),
+// nếu không ai đặt giá -> chuyển FAILED. Sau khi không còn ACTIVE, tài sản tự động biến mất khỏi
+// trang chủ (API getApprovedAssets chỉ lấy session có status = 'ACTIVE').
+const closeExpiredAuctionSessions = async () => {
+  try {
+    const [expiredSessions] = await db.execute(
+      `SELECT id, asset_id FROM auction_sessions WHERE status = 'ACTIVE' AND end_time <= NOW()`
+    );
+
+    for (const session of expiredSessions) {
+      let winnerId = null;
+      try {
+        const [topBid] = await db.execute(
+          `SELECT user_id FROM bids WHERE session_id = ? ORDER BY amount DESC, created_at DESC LIMIT 1`,
+          [session.id]
+        );
+        if (topBid.length > 0) winnerId = topBid[0].user_id;
+      } catch (bidErr) {
+        console.error('Không đọc được lịch sử đặt giá để chọn người thắng:', bidErr.message);
+      }
+
+      if (winnerId) {
+        await db.execute(
+          `UPDATE auction_sessions SET status = 'CLOSED', winner_id = ? WHERE id = ?`,
+          [winnerId, session.id]
+        );
+      } else {
+        await db.execute(`UPDATE auction_sessions SET status = 'FAILED' WHERE id = ?`, [session.id]);
+      }
+    }
+  } catch (error) {
+    console.error('Lỗi khi tự động đóng phiên đấu giá hết hạn:', error.message);
+  }
+};
+
+// Chạy mỗi 60 giây
+setInterval(closeExpiredAuctionSessions, 60 * 1000);
+closeExpiredAuctionSessions();
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server chạy cực cháy tại cổng ${PORT}`);

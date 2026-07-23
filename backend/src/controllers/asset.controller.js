@@ -130,6 +130,88 @@ const AssetController = {
             console.error(error);
             res.status(500).json({ success: false, message: 'Lỗi server!' });
         }
+    },
+
+    // Lấy toàn bộ tin đăng của CHÍNH người bán đang đăng nhập (để họ tự quản lý/xoá)
+    getMyAssets: async (req, res) => {
+        try {
+            const seller_id = req.user.id;
+
+            const [rows] = await db.execute(`
+                SELECT a.*, s.status AS session_status, s.current_price, s.end_time, s.winner_id
+                FROM assets a
+                LEFT JOIN auction_sessions s ON a.id = s.asset_id
+                WHERE a.seller_id = ?
+                ORDER BY a.created_at DESC
+            `, [seller_id]);
+
+            res.status(200).json({ success: true, data: rows });
+        } catch (error) {
+            console.error("Lỗi API getMyAssets:", error);
+            res.status(500).json({ success: false, message: 'Lỗi server!' });
+        }
+    },
+
+    // Cho admin xem TOÀN BỘ tài sản (mọi trạng thái) để quản lý/gỡ khỏi sàn khi cần
+    getAllAssetsForAdmin: async (req, res) => {
+        try {
+            const [rows] = await db.execute(`
+                SELECT a.*, s.status AS session_status, s.current_price, s.end_time, s.winner_id
+                FROM assets a
+                LEFT JOIN auction_sessions s ON a.id = s.asset_id
+                ORDER BY a.created_at DESC
+            `);
+
+            res.status(200).json({ success: true, data: rows });
+        } catch (error) {
+            console.error("Lỗi API getAllAssetsForAdmin:", error);
+            res.status(500).json({ success: false, message: 'Lỗi server!' });
+        }
+    },
+
+    // Xoá/Huỷ 1 tin đăng.
+    // - Người bán: chỉ được xoá tin của chính mình, và CHỈ khi chưa có ai đặt giá (tránh mất công bằng với người đã tham gia).
+    // - Admin: được xoá bất kỳ tin nào, kể cả đã có người đấu giá thành công/đã bán (gỡ khỏi sàn).
+    deleteAsset: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const isAdmin = req.user.role === 'ADMIN';
+
+            const [assetRows] = await db.execute('SELECT * FROM assets WHERE id = ?', [id]);
+            if (assetRows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Không tìm thấy tài sản này!' });
+            }
+            const asset = assetRows[0];
+
+            if (!isAdmin && asset.seller_id !== req.user.id) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền xoá tin đăng này!' });
+            }
+
+            if (!isAdmin) {
+                // Người bán thường: chặn xoá nếu đã có người đặt giá cho tài sản này
+                const [bidCountRows] = await db.execute(`
+                    SELECT COUNT(*) AS total FROM bids b
+                    JOIN auction_sessions s ON b.session_id = s.id
+                    WHERE s.asset_id = ?
+                `, [id]);
+
+                if (bidCountRows[0].total > 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Sản phẩm đã có người đặt giá, bạn không thể tự xoá. Vui lòng liên hệ quản trị viên nếu thực sự cần gỡ bỏ.'
+                    });
+                }
+            }
+
+            // FK trong bảng auction_sessions/bids đã khai báo ON DELETE CASCADE nên xoá asset
+            // sẽ tự động dọn theo cả phiên đấu giá và lịch sử đặt giá liên quan.
+            await db.execute('DELETE FROM assets WHERE id = ?', [id]);
+
+            res.status(200).json({ success: true, message: 'Đã xoá tin đăng thành công!' });
+        } catch (error) {
+            console.error("Lỗi API deleteAsset:", error);
+            res.status(500).json({ success: false, message: 'Lỗi server!' });
+        }
     }
 };
 

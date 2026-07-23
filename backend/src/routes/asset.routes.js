@@ -5,8 +5,11 @@ const { verifyToken, verifyAdmin } = require('../middlewares/auth.middleware');
 
 router.get('/', AssetController.getApprovedAssets);
 router.post('/', verifyToken, AssetController.createAsset);
+router.get('/mine', verifyToken, AssetController.getMyAssets);
 router.get('/pending', verifyAdmin, AssetController.getPendingAssets);
+router.get('/admin/all', verifyAdmin, AssetController.getAllAssetsForAdmin);
 router.get('/:id', AssetController.getAssetById);
 router.put('/:id/status', verifyAdmin, AssetController.approveAsset);
+router.delete('/:id', verifyToken, AssetController.deleteAsset);
 
 module.exports = router;
